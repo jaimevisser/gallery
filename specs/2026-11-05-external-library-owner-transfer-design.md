@@ -152,6 +152,7 @@ Recorded on 2026-11-07 from owner review.
    > - {new owner} becomes the owner of every photo and video in this library, with their people, tags, and any albums or stacks that contain only these photos.
    > - People from this library move to {new owner} with their names, birthdays, and favorite and hidden settings. Shares of those people stay in place, and {new owner} can end them.
    > - A shared space owned by {new owner} is created so {former owner} can keep viewing these photos, read-only. {former owner}'s favorites stay with them. They lose access when they leave that space or the space is deleted.
+   > - {former owner} may keep seeing these photos as their own in the official Immich app until they reinstall it. Gallery apps update on their own.
    > - Albums and stacks that also contain photos outside this library stay with {former owner}. The transferred photos are removed from them.
    > - The library cannot be scanned, and its photos cannot be edited, until the transfer finishes. If the transfer is interrupted, it resumes. If it fails, the library stays with {former owner}.
    > - When it finishes, you get a report of what moved, what was removed from mixed albums and stacks, and which shares were kept.
