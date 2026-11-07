@@ -4,7 +4,7 @@ Date: 2026-11-05
 
 ## Status
 
-Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)). Implementation has not started. The verification items in Decisions must pass first.
+Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)), including the admin-facing wording in Decision 7. Implementation has not started. One verification item (sync for the former owner's clients) is still open; the results of the others are recorded under Decisions.
 
 ## Problem
 
@@ -104,7 +104,7 @@ Sidecars are particularly valuable for recovering supported metadata after a lib
 Treat the two options as complementary, with **Option A as the primary feature**:
 
 1. Add an explicit, admin-only “Transfer owner” operation that preserves the library and asset IDs and runs as the job in [Decisions](#decisions). Do not model transfer as deleting and recreating the library or as editing `ownerId` through the general update endpoint.
-2. Apply the policy in [Decisions](#decisions). Confirm the mixed album, stack, and person rules and pass the verification items before implementation.
+2. Apply the policy in [Decisions](#decisions) and pass the open verification item before implementation.
 3. In a separate or follow-up slice, extend file-sidecar persistence for selected portable fields, starting with named face regions using the already-supported `RegionInfo` import format. Keep the supported field list and read-only limitations explicit.
 4. Do not promise that “all metadata” is preserved by XMP alone. If full database teardown/re-import recovery is a requirement, design a Gallery-specific versioned catalog/manifest with stable asset and person identities and documented ownership, privacy, and conflict semantics.
 
@@ -140,21 +140,30 @@ Recorded on 2026-11-07 from owner review.
    - **Later merges.** A former owner's person cannot merge with a transferred person across owners. The existing guard rejects this at write time, so an admin sees an error rather than a silent wrong merge.
    - **Shared-space dependency.** The former owner's view of transferred favorites depends on the space. Removing their membership or deleting the space hides those assets from them, but their `asset_favorite` rows survive. Unlinking the library from the space revokes their access through the existing shared-space library audit path.
    - **Repeat transfers.** `asset.isFavorite` is recomputed from the current owner's overlay at every transfer, so a second transfer does not carry a stale projection.
-   The album, stack, and people rules are recommended defaults. They need confirmation before implementation.
+   The owner confirmed the album, stack, and people rules on 2026-11-07.
 5. **People links.** Each transferred face keeps its `asset_face` row ID. `shared_space_person_face` and `shared_space_person.faceAssetId` reference face IDs, so those links survive. The job rebinds each face's person group to the new owner's person and keeps any space link the face already has. The existing space/library face reconciliation is queued for linked spaces after finalization.
 
    Person-level metadata moves with the group, because the new owner takes the people as part of the handoff: `person.name`, `person.birthDate`, `person.isHidden`, `person.isFavorite`, the `person_identity` row, and the `person_pet` species. Their `ownerId` columns are updated with the group. Shared-space person rows (`shared_space_person`, including its own `birthDate` and source fields) belong to the space and are not rewritten. `person_user` shares on a transferred group are kept and rebound to the new owner. The foreign key on `(sharedById, personGroupId)` cascades the owner change, so the new owner becomes the sharer and can retract any share, because the retract path matches on `sharedById`. Before finalization the job deletes any share whose `sharedWithId` is the new owner, since a self-share fails `person_user_sharedBy_sharedWith_chk`. The transfer report lists the kept shares. The assumption behind this item is that the people involved know each other and accept sharing this metadata.
-6. **Transfer runs as a job.** States: queued, running, finalizing, done, failed. While the job runs, the library is marked transferring, and scans, sidecar writes, and owner-scoped writes to its assets are blocked. Batches are keyed by asset ID, committed independently, and idempotent, so a retry resumes from the last batch. Finalization is the only step that changes visibility. It sets `library.ownerId`, inserts the new owner's `library_user` row, writes the former owner's `library_audit` row only when no other path remains, and bumps `library.updateId`. A failure before finalization leaves the library with its former owner. A reverse run restores that owner, since asset IDs are unchanged.
+6. **Transfer runs as a job.** States: queued, running, finalizing, done, failed. While the job runs, the library is marked transferring, and scans, sidecar writes, and owner-scoped writes to its assets are blocked. Batches of 1,000 assets are keyed by asset ID, committed independently, and idempotent, so a retry resumes from the last batch. Reads continue during the run, and visibility changes only at finalization. The owner accepted this window on 2026-11-07. Finalization is the only step that changes visibility. It sets `library.ownerId`, inserts the new owner's `library_user` row, writes the former owner's `library_audit` row only when no other path remains, and bumps `library.updateId`. A failure before finalization leaves the library with its former owner. A reverse run restores that owner, since asset IDs are unchanged.
+7. **What the admin is told.** The confirmation dialog states the following before the admin confirms. Plain language; no storage terms. The English text is the source for the overlay strings in the nine maintained locales.
+
+   > **Transfer "{library}" to {new owner}?**
+   >
+   > - {new owner} becomes the owner of every photo and video in this library, with their people, tags, and any albums or stacks that contain only these photos.
+   > - People from this library move to {new owner} with their names, birthdays, and favorite and hidden settings. Shares of those people stay in place, and {new owner} can end them.
+   > - A shared space owned by {new owner} is created so {former owner} can keep viewing these photos, read-only. {former owner}'s favorites stay with them. They lose access when they leave that space or the space is deleted.
+   > - Albums and stacks that also contain photos outside this library stay with {former owner}. The transferred photos are removed from them.
+   > - The library cannot be scanned, and its photos cannot be edited, until the transfer finishes. If the transfer is interrupted, it resumes. If it fails, the library stays with {former owner}.
+   > - When it finishes, you get a report of what moved, what was removed from mixed albums and stacks, and which shares were kept.
 
 Verify before implementation. Decisions 2 and 5 depend on these:
 
-- Whether a shared-space viewer can write their own `asset_favorite` overlay row. If not, decision 2 cannot keep favorites live and needs a permission change.
-- Whether the `asset_favorite` triggers fire on the bulk `asset.ownerId` update, and whether they recompute the projection in the right order.
-- Whether the shared-space `library_user` insert triggers use `ON CONFLICT`, so an insert over an existing row is safe.
-- Which sync path tells the former owner's clients that owned assets are gone when their access continues through the space.
+- Shared-space viewer favorite writes: passes on code. The favorite write requires only `AssetRead`, which a space viewer holds. The RBAC oracle should confirm the viewer role.
+- `asset_favorite` triggers on the bulk `asset.ownerId` update: do not fire, because the forward trigger acts on overlay rows and the reverse trigger acts only on `isFavorite` writes. The job must recompute `asset.isFavorite` from the new owner's overlay explicitly (Decision 4). Open detail: the reverse trigger's event clause is not yet read.
+- Shared-space `library_user` inserts: passes. All library-user inserts use `ON CONFLICT DO NOTHING`.
+- Sync path for the former owner's clients when access continues through the space: open. Requires reading the asset sync path and a test from a pre-transfer checkpoint.
 
 ## Open items
 
-- Acceptable unavailability window and batch size for the job.
 - Which face/person fields are in scope for portable sidecar write-back, and whether a Gallery-specific stable person identity is acceptable alongside standard XMP regions.
 - Whether delete/re-add recovery is a supported requirement, or the required workflow is specifically an in-place owner transfer.
