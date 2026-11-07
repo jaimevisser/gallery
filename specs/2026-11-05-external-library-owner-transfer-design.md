@@ -4,7 +4,7 @@ Date: 2026-11-05
 
 ## Status
 
-Investigation and proposed direction. No implementation decision has been made.
+Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)). Implementation has not started. The verification items in Decisions must pass first.
 
 ## Problem
 
@@ -73,15 +73,15 @@ This is the best path for retaining existing Gallery-only metadata because it ke
 
 The operation should validate that the source library is active and the target account can own it, then preserve the library ID, asset IDs, import paths, and exclusions. Scans and ownership-sensitive writes must not race with the transfer. The service must update `library.ownerId`, update all associated `asset.ownerId` values, and reconcile trigger-maintained face state, `library_user`, audit records, update IDs, and sync backfills as one well-defined state transition.
 
-User-scoped associations need explicit rules:
+User-scoped associations follow the rules recorded in [Decisions](#decisions):
 
-- Copy or map tags to the new user and retain the asset-tag links; do not silently point new-owner assets at tags belonging only to the old user.
-- Decide whether the old owner's favorite state becomes the new owner's favorite state. Keep other viewers' favorites separate.
-- Do not automatically transfer mixed albums, stacks, or people that also reference assets outside this library. Define whether those relationships stay with the old owner, are copied/split, or require the administrator to resolve them.
-- Reconcile person/identity assignments per affected face. Preserve space-scoped people when valid, and queue the existing space/library face reconciliation for linked spaces. Avoid broad face re-detection unless the relationship repair cannot preserve valid assignments.
-- Ensure the old owner's clients receive revocation/removal events and the new owner's clients receive a complete library/asset backfill. Sync state must not depend on either client being online during the operation.
+- Tags: map each transferred asset's tag links by name to the new owner's tags, creating missing tags and keeping hierarchy. Remove links from transferred assets to the former owner's tags. The former owner's tag rows stay unchanged for their other assets.
+- Favorites: the former owner's `asset_favorite` rows are not touched, and the former owner keeps them visible through the retained shared-space access. The new owner's `asset.isFavorite` projection is recomputed from the new owner's overlay, so the new owner starts with no favorites.
+- Albums, stacks, and people that mix library and non-library assets are split at the transferred assets, not moved whole.
+- Faces: keep each `asset_face` row and its `shared_space_person_face` and `shared_space_person` links. Rebind only the owner-scoped person group.
+- Sync grants: the owner grant is insert-only (`library_after_insert`), so finalization inserts the new owner's `library_user` row with the default `createId`. A `library_audit` row for the former owner is written only when no other access path remains, because `library_user_delete_after_audit` deletes the (userId, libraryId) row unconditionally and that row is shared by the owner and space paths. Finalization also bumps `library.updateId` and each transferred asset's `updateId`.
 
-For large libraries, a single transaction that updates every row may create unacceptable locks and WAL volume. The implementation should first define the concurrency and visibility contract, then choose between a bounded transaction and a resumable transfer job. A job-based design needs a durable transfer state, scan/write exclusion, idempotent batches, a clear rollback/retry path, and a finalization step so clients do not observe a partially transferred library as complete.
+Large libraries use the resumable job in [Decisions](#decisions). A single transaction over every asset and face row is rejected: it holds locks and WAL for the whole transfer, and clients could observe a partial state.
 
 ## Option B: persist metadata in sidecars
 
@@ -103,8 +103,8 @@ Sidecars are particularly valuable for recovering supported metadata after a lib
 
 Treat the two options as complementary, with **Option A as the primary feature**:
 
-1. Add an explicit, admin-only “Transfer owner” operation that preserves the library and asset IDs. Do not model transfer as deleting and recreating the library or as editing `ownerId` through the general update endpoint.
-2. Before implementation, settle the transfer policy for user-scoped metadata—especially people shared across assets outside the library, tags, favorites, mixed albums/stacks, and linked shared spaces—and the client-sync removal/backfill contract.
+1. Add an explicit, admin-only “Transfer owner” operation that preserves the library and asset IDs and runs as the job in [Decisions](#decisions). Do not model transfer as deleting and recreating the library or as editing `ownerId` through the general update endpoint.
+2. Apply the policy in [Decisions](#decisions). Confirm the mixed album, stack, and person rules and pass the verification items before implementation.
 3. In a separate or follow-up slice, extend file-sidecar persistence for selected portable fields, starting with named face regions using the already-supported `RegionInfo` import format. Keep the supported field list and read-only limitations explicit.
 4. Do not promise that “all metadata” is preserved by XMP alone. If full database teardown/re-import recovery is a requirement, design a Gallery-specific versioned catalog/manifest with stable asset and person identities and documented ownership, privacy, and conflict semantics.
 
@@ -115,21 +115,43 @@ This ordering addresses the account-switch use case without first requiring a ne
 The transfer must be covered by tests that verify both retained metadata and access boundaries:
 
 - A transfer keeps the same library and asset IDs, EXIF rows, supported edits, trims, face detections, and valid relationships.
-- The target owner can read and manage the transferred assets; the former owner loses direct access unless a separate share still grants it.
-- Tag, favorite, album, stack, person, and linked-space behavior matches the chosen policy, including assets/people that also exist outside the transferred library.
+- The target owner can read and manage the transferred assets. The former owner has no ownership rights and reads them only through the retained shared space; removing that membership removes their access.
+- Tag, favorite, album, stack, person, and linked-space behavior matches [Decisions](#decisions), including assets and people that also exist outside the transferred library. Mixed albums, stacks, and person groups are split, not moved whole.
 - The old and new users receive correct library/asset sync state after reconnecting from checkpoints created before transfer. Test the case where neither client is online during transfer.
-- A failed or retried transfer cannot leave assets owned by a different account than their library or leave stale access grants.
+- A failed, interrupted, or retried job cannot leave assets owned by a different account than their library, leave stale access grants, or make the library visible to the new owner before finalization. A retry resumes from the last committed batch.
 - Sidecar round-trip tests cover supported metadata, named face regions, orientation-adjusted face geometry, external edits, read-only mounts, and repeated extraction without duplicate/stale faces.
 - Deleting and re-adding a library demonstrates exactly which sidecar-backed fields are recovered and which Gallery-only relationships are not.
 
 Any authorization gate added for transfer must follow the repository's enumerating authorization-test requirements. Any new sidecar schema or migration must preserve Gallery's revert-to-Immich and migration downgrade guarantees.
 
-## Open decisions
+## Decisions
 
-- Should the previous owner retain any access to a transferred library, or is transfer always a full ownership handoff?
-- Should the new owner inherit the former owner's favorites, tags, named people, person birthdays, and hidden-person settings?
-- What should happen to albums/stacks and person groups that mix library assets with assets owned outside the library?
-- Should shared-space links stay in place automatically, require confirmation, or be removed during transfer?
-- Is the first release required to handle arbitrarily large libraries without a long transaction, and what is the acceptable period of transfer unavailability?
-- Which face/person fields are in scope for portable sidecar write-back, and is a Gallery-specific stable person identity acceptable alongside standard XMP regions?
-- Is delete/re-add recovery a supported requirement, or is the required workflow specifically an in-place owner transfer?
+Recorded on 2026-11-07 from owner review.
+
+1. **Full ownership handoff.** The new owner owns the library, its assets, and the transferred metadata. The former owner's ownership ends at finalization.
+2. **The former owner keeps read access through a shared space.** The former owner keeps their favorites by remaining a viewer of the library, not by copying favorites. The transfer creates a shared space owned by the new owner, links the library to it, and adds the former owner as a viewer. Consequence: the former owner can see every transferred asset, read-only, for as long as that space and membership exist. This is a visibility decision, not an ownership one, and the new owner must be told before the transfer.
+3. **Tags.** Name-based mapping to the new owner's tags, as in Required behavior.
+4. **Yes, these problems would follow unless the rules below apply.**
+   - **Albums (privacy).** Album ownership lives in `album_user`, not on `album`. If an album the former owner owns keeps transferred assets, the former owner can share them with people the new owner never approved, and the new owner cannot remove them. Recommended rule: albums whose members are all library assets move to the new owner. Mixed albums stay with the former owner, transferred members are removed from them, and the removal is listed in the transfer report.
+   - **Stacks (invariant).** `stack.ownerId` is separate from the owner of its assets. A mixed stack would have a primary asset owned by one account and the stack owned by another. Recommended rule: stacks whose members are all library assets move with their owner. Mixed stacks are split so the transferred members leave the stack.
+   - **People (silent loss).** `asset_face.ownerId` is copied from the asset, while `person` is keyed by (ownerId, personGroupId). Any query that joins faces to people by owner drops transferred faces once their asset moves. Recommended rule: transferred faces move to a person group owned by the new owner. Faces on non-library assets stay with the former owner's person group.
+   - **Later merges.** A former owner's person cannot merge with a transferred person across owners. The existing guard rejects this at write time, so an admin sees an error rather than a silent wrong merge.
+   - **Shared-space dependency.** The former owner's view of transferred favorites depends on the space. Removing their membership or deleting the space hides those assets from them, but their `asset_favorite` rows survive. Unlinking the library from the space revokes their access through the existing shared-space library audit path.
+   - **Repeat transfers.** `asset.isFavorite` is recomputed from the current owner's overlay at every transfer, so a second transfer does not carry a stale projection.
+   The album, stack, and people rules are recommended defaults. They need confirmation before implementation.
+5. **People links.** Each transferred face keeps its `asset_face` row ID. `shared_space_person_face` and `shared_space_person.faceAssetId` reference face IDs, so those links survive. The job rebinds each face's person group to the new owner's person and keeps any space link the face already has. The existing space/library face reconciliation is queued for linked spaces after finalization.
+6. **Transfer runs as a job.** States: queued, running, finalizing, done, failed. While the job runs, the library is marked transferring, and scans, sidecar writes, and owner-scoped writes to its assets are blocked. Batches are keyed by asset ID, committed independently, and idempotent, so a retry resumes from the last batch. Finalization is the only step that changes visibility. It sets `library.ownerId`, inserts the new owner's `library_user` row, writes the former owner's `library_audit` row only when no other path remains, and bumps `library.updateId`. A failure before finalization leaves the library with its former owner. A reverse run restores that owner, since asset IDs are unchanged.
+
+Verify before implementation. Decisions 2 and 5 depend on these:
+
+- Whether a shared-space viewer can write their own `asset_favorite` overlay row. If not, decision 2 cannot keep favorites live and needs a permission change.
+- Whether the `asset_favorite` triggers fire on the bulk `asset.ownerId` update, and whether they recompute the projection in the right order.
+- Whether the shared-space `library_user` insert triggers use `ON CONFLICT`, so an insert over an existing row is safe.
+- Which sync path tells the former owner's clients that owned assets are gone when their access continues through the space.
+
+## Open items
+
+- Acceptable unavailability window and batch size for the job.
+- Whether birthdays and hidden-person settings move with transferred person groups. Decision 2 settled favorites only.
+- Which face/person fields are in scope for portable sidecar write-back, and whether a Gallery-specific stable person identity is acceptable alongside standard XMP regions.
+- Whether delete/re-add recovery is a supported requirement, or the required workflow is specifically an in-place owner transfer.
