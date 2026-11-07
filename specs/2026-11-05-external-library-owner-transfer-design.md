@@ -78,7 +78,7 @@ User-scoped associations follow the rules recorded in [Decisions](#decisions):
 - Tags: map each transferred asset's tag links by name to the new owner's tags, creating missing tags and keeping hierarchy. Remove links from transferred assets to the former owner's tags. The former owner's tag rows stay unchanged for their other assets.
 - Favorites: the former owner's `asset_favorite` rows are not touched, and the former owner keeps them visible through the retained shared-space access. The new owner's `asset.isFavorite` projection is recomputed from the new owner's overlay, so the new owner starts with no favorites.
 - Albums, stacks, and people that mix library and non-library assets are split at the transferred assets, not moved whole.
-- Faces: keep each `asset_face` row and its `shared_space_person_face` and `shared_space_person` links. Rebind only the owner-scoped person group.
+- Faces: keep each `asset_face` row and its `shared_space_person_face` and `shared_space_person` links. Rebind the owner-scoped person group and carry its person-level metadata (see Decision 5).
 - Sync grants: the owner grant is insert-only (`library_after_insert`), so finalization inserts the new owner's `library_user` row with the default `createId`. A `library_audit` row for the former owner is written only when no other access path remains, because `library_user_delete_after_audit` deletes the (userId, libraryId) row unconditionally and that row is shared by the owner and space paths. Finalization also bumps `library.updateId` and each transferred asset's `updateId`.
 
 Large libraries use the resumable job in [Decisions](#decisions). A single transaction over every asset and face row is rejected: it holds locks and WAL for the whole transfer, and clients could observe a partial state.
@@ -117,6 +117,7 @@ The transfer must be covered by tests that verify both retained metadata and acc
 - A transfer keeps the same library and asset IDs, EXIF rows, supported edits, trims, face detections, and valid relationships.
 - The target owner can read and manage the transferred assets. The former owner has no ownership rights and reads them only through the retained shared space; removing that membership removes their access.
 - Tag, favorite, album, stack, person, and linked-space behavior matches [Decisions](#decisions), including assets and people that also exist outside the transferred library. Mixed albums, stacks, and person groups are split, not moved whole.
+- Person name, birthday, hidden flag, favorite flag, identity, and pet species move with a transferred person group, and their `ownerId` columns follow the group. Shared-space person birthdays and names are unchanged.
 - The old and new users receive correct library/asset sync state after reconnecting from checkpoints created before transfer. Test the case where neither client is online during transfer.
 - A failed, interrupted, or retried job cannot leave assets owned by a different account than their library, leave stale access grants, or make the library visible to the new owner before finalization. A retry resumes from the last committed batch.
 - Sidecar round-trip tests cover supported metadata, named face regions, orientation-adjusted face geometry, external edits, read-only mounts, and repeated extraction without duplicate/stale faces.
@@ -140,6 +141,8 @@ Recorded on 2026-11-07 from owner review.
    - **Repeat transfers.** `asset.isFavorite` is recomputed from the current owner's overlay at every transfer, so a second transfer does not carry a stale projection.
    The album, stack, and people rules are recommended defaults. They need confirmation before implementation.
 5. **People links.** Each transferred face keeps its `asset_face` row ID. `shared_space_person_face` and `shared_space_person.faceAssetId` reference face IDs, so those links survive. The job rebinds each face's person group to the new owner's person and keeps any space link the face already has. The existing space/library face reconciliation is queued for linked spaces after finalization.
+
+   Person-level metadata moves with the group, because the new owner takes the people as part of the handoff: `person.name`, `person.birthDate`, `person.isHidden`, `person.isFavorite`, the `person_identity` row, and the `person_pet` species. Their `ownerId` columns are updated with the group. Shared-space person rows (`shared_space_person`, including its own `birthDate` and source fields) belong to the space and are not rewritten. Recommended default, to confirm: `person_user` shares on a transferred group are removed and listed in the transfer report, because they grant access under the former owner's authority. The assumption behind this item is that the people involved know each other and accept sharing this metadata.
 6. **Transfer runs as a job.** States: queued, running, finalizing, done, failed. While the job runs, the library is marked transferring, and scans, sidecar writes, and owner-scoped writes to its assets are blocked. Batches are keyed by asset ID, committed independently, and idempotent, so a retry resumes from the last batch. Finalization is the only step that changes visibility. It sets `library.ownerId`, inserts the new owner's `library_user` row, writes the former owner's `library_audit` row only when no other path remains, and bumps `library.updateId`. A failure before finalization leaves the library with its former owner. A reverse run restores that owner, since asset IDs are unchanged.
 
 Verify before implementation. Decisions 2 and 5 depend on these:
@@ -152,6 +155,5 @@ Verify before implementation. Decisions 2 and 5 depend on these:
 ## Open items
 
 - Acceptable unavailability window and batch size for the job.
-- Whether birthdays and hidden-person settings move with transferred person groups. Decision 2 settled favorites only.
 - Which face/person fields are in scope for portable sidecar write-back, and whether a Gallery-specific stable person identity is acceptable alongside standard XMP regions.
 - Whether delete/re-add recovery is a supported requirement, or the required workflow is specifically an in-place owner transfer.
