@@ -4,7 +4,7 @@ Date: 2026-11-05
 
 ## Status
 
-Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)), including the admin-facing wording in Decision 7. Implementation has not started. One verification item (sync for the former owner's clients) is still open; the results of the others are recorded under Decisions.
+Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)), including the admin-facing wording in Decision 7. Implementation has not started. The former owner's fork-client sync path is read on code and converges through a bumped `asset.updateId`; stock-client staleness and a pre-transfer checkpoint test remain open (see the verify list).
 
 ## Problem
 
@@ -161,7 +161,13 @@ Verify before implementation. Decisions 2 and 5 depend on these:
 - Shared-space viewer favorite writes: passes on code. The favorite write requires only `AssetRead`, which a space viewer holds. The RBAC oracle should confirm the viewer role.
 - `asset_favorite` triggers on the bulk `asset.ownerId` update: do not fire, because the forward trigger acts on overlay rows and the reverse trigger acts only on `isFavorite` writes. The job must recompute `asset.isFavorite` from the new owner's overlay explicitly (Decision 4). Open detail: the reverse trigger's event clause is not yet read.
 - Shared-space `library_user` inserts: passes. All library-user inserts use `ON CONFLICT DO NOTHING`.
-- Sync path for the former owner's clients when access continues through the space: open. Requires reading the asset sync path and a test from a pre-transfer checkpoint.
+- Sync path for the former owner's clients when access continues through the space: read on code, a test from a pre-transfer checkpoint is still required. Findings:
+  - `AssetSync.getUpserts` (`server/src/repositories/sync.repository.ts`, ~383) filters `ownerId = userId`, so the former owner's own-assets stream stops returning transferred rows.
+  - `AssetSync.getDeletes` reads `asset_audit`, which only `asset_delete_audit` writes, on physical DELETE. An owner change emits no audit row, so no delete reaches the former owner through the own-assets stream.
+  - `LibraryAssetSync.getUpserts` (`server/src/gallery/repositories/gallery-sync.repository.ts`, ~569) streams library assets for `accessibleLibraries` with `asset.updateId` as the cursor, and the `libraryId`/ownership predicate keeps the space-link path. A bumped `asset.updateId` therefore re-delivers each transferred asset with the new `ownerId`. Fork clients apply it through `updateAssetsV1`, which writes `ownerId` (`mobile/lib/infrastructure/repositories/sync_stream.repository.dart`, ~255/297). Convergence for fork clients depends on that bump.
+  - Stock clients have no library stream. They keep the row as an owned asset with a stale `ownerId` until a full resync: no delete and no re-send. This is a gap to decide on, not a bug in the code path.
+  - Do not fix the stock gap by writing `asset_audit` rows for the former owner. Fork clients would delete the row, `deleteAssetsV1` (`sync_stream.repository.dart`, ~227) would cascade face rows locally, and the library upsert would re-add the asset without them. Faces and album links would then need their own `updateId` bumps. Open decision: accept the stock-client staleness until resync, or scope a fix to stock clients only.
+  - Still to test: a fork client whose checkpoint predates the transfer, and whether the former owner's face stream drops transferred faces.
 
 ## Open items
 
