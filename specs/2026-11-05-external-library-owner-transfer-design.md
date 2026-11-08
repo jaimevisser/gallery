@@ -4,7 +4,7 @@ Date: 2026-11-05
 
 ## Status
 
-Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)), including the admin-facing wording in Decision 7. Decision 5 (people) and Decision 7 were amended on 2026-11-08: transfers copy people rather than moving person groups, and the admin gets an optional people-matching step before confirming. Implementation has not started. The former owner's fork-client sync path is read on code and converges through a bumped `asset.updateId`; stock-client staleness is accepted (see the verify list), and a pre-transfer checkpoint test remains open.
+Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)), including the admin-facing wording in Decision 7. Decision 5 (people) and Decision 7 were amended on 2026-11-08: transfers copy people rather than moving person groups, and the admin gets an optional people-matching step before confirming. Implementation has not started. Admin flow mockups: [library-owner-transfer.html](mockups/2026-11-05-external-library-owner-transfer/library-owner-transfer.html). The former owner's fork-client sync path is read on code and converges through a bumped `asset.updateId`; stock-client staleness is accepted (see the verify list), and a pre-transfer checkpoint test remains open.
 
 ## Problem
 
