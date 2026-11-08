@@ -1,578 +1,1479 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Library owner transfer · visual reference</title>
-<style>
-:root{
-  --primary:#4250af;--primary-600:#39459a;--primary-tint:#eef0fb;--primary-tint-2:#e2e6f7;
-  --success:#2fa84f;--success-tint:#e8f6ec;--warning:#e0a106;--warning-tint:#fdf3e0;
-  --danger:#dc3a3a;--danger-tint:#fcecec;
-  --bg:#fff;--canvas:#f4f5f8;--subtle:#f6f6f8;--fg:#191b22;--muted:#6b7180;--muted-2:#9aa0ad;
-  --line:#e7e8ee;--line-2:#dadce4;
-  --font:'Google Sans','Roboto',system-ui,sans-serif;
-  --mono:'Roboto Mono',monospace;
-}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{background:#dfe1e8;color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.01em}
-p{margin:0}
-button{font-family:inherit}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Library owner transfer · visual reference</title>
+    <style>
+        :root {
+            --primary: #4250af;
+            --primary-600: #39459a;
+            --primary-tint: #eef0fb;
+            --primary-tint-2: #e2e6f7;
+            --success: #2fa84f;
+            --success-tint: #e8f6ec;
+            --warning: #e0a106;
+            --warning-tint: #fdf3e0;
+            --danger: #dc3a3a;
+            --danger-tint: #fcecec;
+            --bg: #fff;
+            --canvas: #f4f5f8;
+            --subtle: #f6f6f8;
+            --fg: #191b22;
+            --muted: #6b7180;
+            --muted-2: #9aa0ad;
+            --line: #e7e8ee;
+            --line-2: #dadce4;
+            --font: 'Google Sans', 'Roboto', system-ui, sans-serif;
+            --mono: 'Roboto Mono', monospace;
+        }
 
-/* doc chrome */
-.doc{max-width:1200px;margin:0 auto;padding:28px 20px 80px}
-.doc-head{margin-bottom:14px}
-.doc-head h1{font-size:26px}
-.doc-head p{color:#474c5a;max-width:760px;margin-top:4px}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
-.tab{border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;color:#3a3f4c}
-.tab[aria-selected=true]{background:var(--primary);border-color:var(--primary);color:#fff}
-.tab small{opacity:.7;margin-left:4px}
-.screen[hidden]{display:none!important}
-.note{background:#fffbea;border:1px solid #f1e3a6;border-radius:12px;padding:12px 16px;margin:0 0 16px;color:#5b4b10;font-size:13px}
+        * {
+            box-sizing: border-box
+        }
 
-/* app shell */
-.frame{border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(20,24,40,.18);background:var(--canvas);position:relative;min-height:640px}
-.topbar{height:56px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 18px}
-.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;width:200px}
-.logo i{width:26px;height:26px;border-radius:8px;background:conic-gradient(from 200deg,#4250af,#d6457a,#e0a106,#2fa84f,#4250af)}
-.search{flex:1;max-width:520px;height:38px;border-radius:999px;background:var(--subtle);border:1px solid var(--line);display:flex;align-items:center;padding:0 16px;color:var(--muted-2)}
-.avatar{margin-left:auto;width:32px;height:32px;border-radius:50%;background:#c9cdea;display:grid;place-items:center;font-weight:600;color:var(--primary)}
-.shell{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:584px}
-.side{background:#fff;border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:2px}
-.nav{display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:999px;color:#3a3f4c;font-weight:500}
-.nav .ic{width:18px;height:18px;border-radius:5px;border:2px solid currentColor;opacity:.75}
-.nav.on{background:var(--primary-tint);color:var(--primary)}
-.nav-sec{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-2);padding:14px 14px 4px;font-weight:600}
-.main{padding:22px 28px 40px;min-width:0}
-.crumb{color:var(--muted);font-size:13px;margin-bottom:4px}
-.crumb a{color:var(--primary);text-decoration:none}
-.page-h{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:18px}
-.page-h h2{font-size:22px}
-.page-h .right{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:relative}
+        html,
+        body {
+            margin: 0
+        }
 
-/* common */
-.card{background:#fff;border:1px solid var(--line);border-radius:16px}
-.pad{padding:18px 20px}
-.btn{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:8px 16px;font-weight:600;font-size:13px;border:1px solid transparent;cursor:pointer;white-space:nowrap;background:#fff;color:#3a3f4c;border-color:var(--line-2)}
-.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
-.btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
-.btn.sm{padding:5px 12px;font-size:12px}
-.btn[disabled]{opacity:.45;cursor:default}
-.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;background:var(--subtle);border:1px solid var(--line);color:#3a3f4c;white-space:nowrap}
-.chip.new{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary)}
-.chip.ok{background:var(--success-tint);border-color:#cbeccf;color:#1e7a38}
-.chip.warn{background:var(--warning-tint);border-color:#f4e0b2;color:#8a6200}
-.chip.bad{background:var(--danger-tint);border-color:#f6d0d0;color:#a52828}
-.muted{color:var(--muted)}
-.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.kv{display:grid;grid-template-columns:150px 1fr;gap:8px 16px;font-size:13px}
-.kv dt{color:var(--muted)}
-.kv dd{margin:0}
-.thumb{width:44px;height:44px;border-radius:8px;flex:0 0 auto;background:linear-gradient(135deg,#9db0e6,#e7a6c0)}
-.thumb.b{background:linear-gradient(135deg,#b8e0c2,#8fc7d9)}
-.thumb.c{background:linear-gradient(135deg,#f3d08a,#d98c6a)}
-.thumb.d{background:linear-gradient(135deg,#c7b8ea,#6f7fc9)}
-.banner{border-radius:12px;padding:12px 16px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
-.banner.info{background:var(--primary-tint);color:#2c3670;border:1px solid var(--primary-tint-2)}
-.banner.warn{background:var(--warning-tint);color:#6b4d00;border:1px solid #f4e0b2}
-.banner.bad{background:var(--danger-tint);color:#7d1f1f;border:1px solid #f6d0d0}
-.banner.ok{background:var(--success-tint);color:#17602b;border:1px solid #cbeccf}
-.banner b{display:block;margin-bottom:2px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
-th{font-size:12px;color:var(--muted);font-weight:600}
-td.r,th.r{text-align:right}
-.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden}
-.seg span{padding:4px 12px;font-size:12px;font-weight:500;color:#3a3f4c}
-.seg span{cursor:pointer}
-.seg span.on{background:var(--primary);color:#fff}
-.seg span.off{opacity:.4;cursor:default}
-.select{border:1px solid var(--line-2);border-radius:10px;padding:8px 12px;background:#fff;font-size:13px;min-width:220px;display:flex;justify-content:space-between;align-items:center}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.stat{padding:12px 14px;border-radius:12px;background:var(--subtle);border:1px solid var(--line)}
-.stat b{display:block;font-size:20px}
-.stat span{font-size:12px;color:var(--muted)}
+        body {
+            background: #dfe1e8;
+            color: var(--fg);
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased
+        }
 
-/* modal */
-.scrim{position:absolute;inset:0;background:rgba(20,24,40,.36);display:grid;place-items:center;padding:24px}
-.modal{background:#fff;border-radius:18px;width:min(640px,100%);box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
-.modal.wide{width:min(760px,100%)}
-.modal-h{padding:18px 22px 6px}
-.modal-h h3{font-size:19px}
-.modal-h .step{font-size:12px;color:var(--muted);margin-top:2px}
-.modal-b{padding:12px 22px 18px;max-height:440px;overflow:auto}
-.modal-f{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;align-items:center}
-.modal-f .left{margin-right:auto;font-size:12px;color:var(--muted)}
-.bullets{margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.55;color:#2a2e3a}
-.bullets li{margin:0 0 8px}
-.hl{background:var(--warning-tint);border-radius:4px;padding:0 3px}
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: -.01em
+        }
 
-/* stepper */
-.stepper{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
-.st{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;font-size:13px}
-.st b{display:block}
-.st span{font-size:12px;color:var(--muted)}
-.st.done{border-color:#cbeccf;background:var(--success-tint)}
-.st.done span{color:#1e7a38}
-.st.now{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-tint-2)}
-.st.now span{color:var(--primary)}
-.bar{height:10px;background:var(--line);border-radius:999px;overflow:hidden;margin:8px 0 4px}
-.bar>span{display:block;height:100%;background:var(--primary)}
-.batches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
-.batches div{height:28px;border-radius:6px;background:var(--line);font-size:11px;display:grid;place-items:center;color:var(--muted);font-weight:600}
-.batches div.ok{background:var(--success-tint);color:#1e7a38}
-.batches div.now{background:var(--primary-tint-2);color:var(--primary);outline:2px solid var(--primary)}
-.cols2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.report-list{list-style:none;margin:0;padding:0}
-.report-list li{padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;display:flex;gap:10px;justify-content:space-between;align-items:center}
-.report-list li:last-child{border-bottom:0}
-</style>
+        p {
+            margin: 0
+        }
+
+        button {
+            font-family: inherit
+        }
+
+        /* doc chrome */
+        .doc {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 20px 80px
+        }
+
+        .doc-head {
+            margin-bottom: 14px
+        }
+
+        .doc-head h1 {
+            font-size: 26px
+        }
+
+        .doc-head p {
+            color: #474c5a;
+            max-width: 760px;
+            margin-top: 4px
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 0 0 16px
+        }
+
+        .tab {
+            border: 1px solid var(--line-2);
+            background: #fff;
+            border-radius: 999px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #3a3f4c
+        }
+
+        .tab[aria-selected=true] {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff
+        }
+
+        .tab small {
+            opacity: .7;
+            margin-left: 4px
+        }
+
+        .screen[hidden] {
+            display: none !important
+        }
+
+        .note {
+            background: #fffbea;
+            border: 1px solid #f1e3a6;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin: 0 0 16px;
+            color: #5b4b10;
+            font-size: 13px
+        }
+
+        /* app shell */
+        .frame {
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(20, 24, 40, .18);
+            background: var(--canvas);
+            position: relative;
+            min-height: 640px
+        }
+
+        .topbar {
+            height: 56px;
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 18px
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            width: 200px
+        }
+
+        .logo i {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: conic-gradient(from 200deg, #4250af, #d6457a, #e0a106, #2fa84f, #4250af)
+        }
+
+        .search {
+            flex: 1;
+            max-width: 520px;
+            height: 38px;
+            border-radius: 999px;
+            background: var(--subtle);
+            border: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            color: var(--muted-2)
+        }
+
+        .avatar {
+            margin-left: auto;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #c9cdea;
+            display: grid;
+            place-items: center;
+            font-weight: 600;
+            color: var(--primary)
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: 200px minmax(0, 1fr);
+            min-height: 584px
+        }
+
+        .side {
+            background: #fff;
+            border-right: 1px solid var(--line);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            color: #3a3f4c;
+            font-weight: 500
+        }
+
+        .nav .ic {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 2px solid currentColor;
+            opacity: .75
+        }
+
+        .nav.on {
+            background: var(--primary-tint);
+            color: var(--primary)
+        }
+
+        .nav-sec {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--muted-2);
+            padding: 14px 14px 4px;
+            font-weight: 600
+        }
+
+        .main {
+            padding: 22px 28px 40px;
+            min-width: 0
+        }
+
+        .crumb {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 4px
+        }
+
+        .crumb a {
+            color: var(--primary);
+            text-decoration: none
+        }
+
+        .page-h {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px
+        }
+
+        .page-h h2 {
+            font-size: 22px
+        }
+
+        .page-h .right {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            position: relative
+        }
+
+        /* common */
+        .card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 16px
+        }
+
+        .pad {
+            padding: 18px 20px
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            background: #fff;
+            color: #3a3f4c;
+            border-color: var(--line-2)
+        }
+
+        .btn.primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary)
+        }
+
+        .btn.danger {
+            background: var(--danger);
+            color: #fff;
+            border-color: var(--danger)
+        }
+
+        .btn.sm {
+            padding: 5px 12px;
+            font-size: 12px
+        }
+
+        .btn[disabled] {
+            opacity: .45;
+            cursor: default
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--subtle);
+            border: 1px solid var(--line);
+            color: #3a3f4c;
+            white-space: nowrap
+        }
+
+        .chip.new {
+            background: var(--primary-tint);
+            border-color: var(--primary-tint-2);
+            color: var(--primary)
+        }
+
+        .chip.ok {
+            background: var(--success-tint);
+            border-color: #cbeccf;
+            color: #1e7a38
+        }
+
+        .chip.warn {
+            background: var(--warning-tint);
+            border-color: #f4e0b2;
+            color: #8a6200
+        }
+
+        .chip.bad {
+            background: var(--danger-tint);
+            border-color: #f6d0d0;
+            color: #a52828
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .mono {
+            font-family: var(--mono);
+            font-variant-numeric: tabular-nums
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 8px 16px;
+            font-size: 13px
+        }
+
+        .kv dt {
+            color: var(--muted)
+        }
+
+        .kv dd {
+            margin: 0
+        }
+
+        .thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            flex: 0 0 auto;
+            background: linear-gradient(135deg, #9db0e6, #e7a6c0)
+        }
+
+        .thumb.b {
+            background: linear-gradient(135deg, #b8e0c2, #8fc7d9)
+        }
+
+        .thumb.c {
+            background: linear-gradient(135deg, #f3d08a, #d98c6a)
+        }
+
+        .thumb.d {
+            background: linear-gradient(135deg, #c7b8ea, #6f7fc9)
+        }
+
+        .banner {
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 13px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start
+        }
+
+        .banner.info {
+            background: var(--primary-tint);
+            color: #2c3670;
+            border: 1px solid var(--primary-tint-2)
+        }
+
+        .banner.warn {
+            background: var(--warning-tint);
+            color: #6b4d00;
+            border: 1px solid #f4e0b2
+        }
+
+        .banner.bad {
+            background: var(--danger-tint);
+            color: #7d1f1f;
+            border: 1px solid #f6d0d0
+        }
+
+        .banner.ok {
+            background: var(--success-tint);
+            color: #17602b;
+            border: 1px solid #cbeccf
+        }
+
+        .banner b {
+            display: block;
+            margin-bottom: 2px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: middle
+        }
+
+        th {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600
+        }
+
+        td.r,
+        th.r {
+            text-align: right
+        }
+
+        .seg {
+            display: inline-flex;
+            border: 1px solid var(--line-2);
+            border-radius: 999px;
+            overflow: hidden
+        }
+
+        .seg span {
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #3a3f4c
+        }
+
+        .seg span {
+            cursor: pointer
+        }
+
+        .seg span.on {
+            background: var(--primary);
+            color: #fff
+        }
+
+        .seg span.off {
+            opacity: .4;
+            cursor: default
+        }
+
+        .select {
+            border: 1px solid var(--line-2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            background: #fff;
+            font-size: 13px;
+            min-width: 220px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px
+        }
+
+        .stat {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: var(--subtle);
+            border: 1px solid var(--line)
+        }
+
+        .stat b {
+            display: block;
+            font-size: 20px
+        }
+
+        .stat span {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        /* modal */
+        .scrim {
+            position: absolute;
+            inset: 0;
+            background: rgba(20, 24, 40, .36);
+            display: grid;
+            place-items: center;
+            padding: 24px
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 18px;
+            width: min(640px, 100%);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+            overflow: hidden
+        }
+
+        .modal.wide {
+            width: min(760px, 100%)
+        }
+
+        .modal-h {
+            padding: 18px 22px 6px
+        }
+
+        .modal-h h3 {
+            font-size: 19px
+        }
+
+        .modal-h .step {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        .modal-b {
+            padding: 12px 22px 18px;
+            max-height: 440px;
+            overflow: auto
+        }
+
+        .modal-f {
+            padding: 14px 22px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            align-items: center
+        }
+
+        .modal-f .left {
+            margin-right: auto;
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .bullets {
+            margin: 8px 0 0;
+            padding-left: 20px;
+            font-size: 14px;
+            line-height: 1.55;
+            color: #2a2e3a
+        }
+
+        .bullets li {
+            margin: 0 0 8px
+        }
+
+        .hl {
+            background: var(--warning-tint);
+            border-radius: 4px;
+            padding: 0 3px
+        }
+
+        /* stepper */
+        .stepper {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 16px
+        }
+
+        .st {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: #fff;
+            font-size: 13px
+        }
+
+        .st b {
+            display: block
+        }
+
+        .st span {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .st.done {
+            border-color: #cbeccf;
+            background: var(--success-tint)
+        }
+
+        .st.done span {
+            color: #1e7a38
+        }
+
+        .st.now {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-tint-2)
+        }
+
+        .st.now span {
+            color: var(--primary)
+        }
+
+        .bar {
+            height: 10px;
+            background: var(--line);
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 8px 0 4px
+        }
+
+        .bar>span {
+            display: block;
+            height: 100%;
+            background: var(--primary)
+        }
+
+        .batches {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-top: 10px
+        }
+
+        .batches div {
+            height: 28px;
+            border-radius: 6px;
+            background: var(--line);
+            font-size: 11px;
+            display: grid;
+            place-items: center;
+            color: var(--muted);
+            font-weight: 600
+        }
+
+        .batches div.ok {
+            background: var(--success-tint);
+            color: #1e7a38
+        }
+
+        .batches div.now {
+            background: var(--primary-tint-2);
+            color: var(--primary);
+            outline: 2px solid var(--primary)
+        }
+
+        .cols2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        .report-list {
+            list-style: none;
+            margin: 0;
+            padding: 0
+        }
+
+        .report-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 13px;
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .report-list li:last-child {
+            border-bottom: 0
+        }
+    </style>
 </head>
+
 <body>
-<div class="doc">
-  <div class="doc-head">
-    <h1>Library owner transfer · visual reference</h1>
-    <p>Admin steps for transferring a library to a new owner, from the design in <code>specs/2026-11-05-external-library-owner-transfer-design.md</code>. Each tab is one state of the admin flow. Copy is draft text for discussion, not final UI strings.</p>
-  </div>
+    <div class="doc">
+        <div class="doc-head">
+            <h1>Library owner transfer · visual reference</h1>
+            <p>Admin steps for transferring a library to a new owner, from the design in
+                <code>specs/2026-11-05-external-library-owner-transfer-design.md</code>. Each tab is one state of the
+                admin flow. Copy is draft text for discussion, not final UI strings.</p>
+        </div>
 
-  <div class="note"><b>Draft for discussion.</b> Names and counts are invented. The entry point (library page, Transfer owner action) is proposed, not decided.</div>
+        <div class="note"><b>Draft for discussion.</b> Names and counts are invented. The entry point (library page,
+            Transfer owner action) is proposed, not decided.</div>
 
-  <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" aria-selected="true" data-t="s1">1 · Library page</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s2">2 · Choose new owner</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s3">3 · Merge people</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s4">4 · Confirm</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s5">5 · Running</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s8">6 · Jobs page</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s6">7 · Interrupted or failed</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s7">8 · Report</button>
-  </nav>
-</div>
+        <nav class="tabs" role="tablist">
+            <button class="tab" role="tab" aria-selected="true" data-t="s1">1 · Library page</button>
+            <button class="tab" role="tab" aria-selected="false" data-t="s2">2 · Choose new owner</button>
+            <button class="tab" role="tab" aria-selected="false" data-t="s3">3 · Merge people</button>
+            <button class="tab" role="tab" aria-selected="false" data-t="s4">4 · Confirm</button>
+            <button class="tab" role="tab" aria-selected="false" data-t="s5">5 · Running</button>
+            <button class="tab" role="tab" aria-selected="false" data-t="s8">6 · Jobs page</button>
+            <button class="tab" role="tab" aria-selected="false" data-t="s6">7 · Interrupted or failed</button>
+            <button class="tab" role="tab" aria-selected="false" data-t="s7">8 · Report</button>
+        </nav>
+    </div>
 
-<style>
-.menu{position:absolute;right:0;top:46px;width:250px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(20,24,40,.18);padding:6px;z-index:2}
-.mi{padding:8px 12px;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:8px}
-.mi.hi{background:var(--primary-tint);color:var(--primary);font-weight:600}
-.mi.danger{color:var(--danger)}
-.sep{height:1px;background:var(--line);margin:6px 4px}
-.inline{margin-top:14px}
-.qcard{display:flex;background:var(--subtle);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:14px}
-.qmain{flex:1;min-width:0;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
-.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.qtitle{font-size:17px;font-weight:600;color:var(--primary)}
-.qtiles{display:flex;max-width:380px;margin-top:6px}
-.qtile{flex:1;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
-.qtile.a{background:var(--primary);color:#fff;border-radius:10px 0 0 10px}
-.qtile.w{background:var(--line-2);border-radius:0 10px 10px 0}
-.qtile b{font-size:22px}
-.qtable{background:#fff;border:1px solid var(--line);border-radius:10px;max-width:520px;font-size:13px;margin-top:6px}
-.qrow{display:grid;grid-template-columns:minmax(0,1fr) 7rem 5rem;gap:16px;padding:8px 14px;border-top:1px solid var(--line)}
-.qrow:first-child{border-top:0}
-.qrow.h{font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:600}
-.qrow>span+span{justify-self:end;text-align:right}
-.qside{width:132px;display:flex;flex-direction:column;border-left:1px solid var(--line-2)}
-.qbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:600;background:#e9eaf0;border:0;border-top:1px solid var(--line-2);color:#3a3f4c;cursor:pointer}
-.qbtn:first-child{border-top:0}
-.qbtn.primary{background:var(--primary);color:#fff}
-.btn.text{background:transparent;border-color:transparent;color:var(--muted)}
-</style>
+    <style>
+        .menu {
+            position: absolute;
+            right: 0;
+            top: 46px;
+            width: 250px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20, 24, 40, .18);
+            padding: 6px;
+            z-index: 2
+        }
 
-<div class="doc" style="padding-top:0">
+        .mi {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
 
-<!-- 1. Library page: entry point -->
-<section class="screen" id="s1">
-  <div class="frame">
-    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
-    <div class="shell">
-      <aside class="side">
-        <div class="nav">Photos</div>
-        <div class="nav">Albums</div>
-        <div class="nav">Spaces</div>
-        <div class="nav-sec">Admin</div>
-        <div class="nav">Jobs</div>
-        <div class="nav on">Libraries</div>
-        <div class="nav">Users</div>
-        <div class="nav">Settings</div>
-      </aside>
-      <main class="main">
-        <div class="crumb"><a>Libraries</a> / Family photos</div>
-        <div class="page-h">
-          <h2>Family photos</h2>
-          <div class="right">
-            <button class="btn sm">Scan</button>
-            <button class="btn sm">More</button>
-            <div class="menu">
-              <div class="mi">Edit</div>
-              <div class="mi">Scan library</div>
-              <div class="mi hi">Transfer owner… <span class="chip new">New</span></div>
-              <div class="sep"></div>
-              <div class="mi danger">Delete library</div>
+        .mi.hi {
+            background: var(--primary-tint);
+            color: var(--primary);
+            font-weight: 600
+        }
+
+        .mi.danger {
+            color: var(--danger)
+        }
+
+        .sep {
+            height: 1px;
+            background: var(--line);
+            margin: 6px 4px
+        }
+
+        .inline {
+            margin-top: 14px
+        }
+
+        .qcard {
+            display: flex;
+            background: var(--subtle);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 14px
+        }
+
+        .qmain {
+            flex: 1;
+            min-width: 0;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .qhead {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .qtitle {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--primary)
+        }
+
+        .qtiles {
+            display: flex;
+            max-width: 380px;
+            margin-top: 6px
+        }
+
+        .qtile {
+            flex: 1;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px
+        }
+
+        .qtile.a {
+            background: var(--primary);
+            color: #fff;
+            border-radius: 10px 0 0 10px
+        }
+
+        .qtile.w {
+            background: var(--line-2);
+            border-radius: 0 10px 10px 0
+        }
+
+        .qtile b {
+            font-size: 22px
+        }
+
+        .qtable {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            max-width: 520px;
+            font-size: 13px;
+            margin-top: 6px
+        }
+
+        .qrow {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 7rem 5rem;
+            gap: 16px;
+            padding: 8px 14px;
+            border-top: 1px solid var(--line)
+        }
+
+        .qrow:first-child {
+            border-top: 0
+        }
+
+        .qrow.h {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 600
+        }
+
+        .qrow>span+span {
+            justify-self: end;
+            text-align: right
+        }
+
+        .qside {
+            width: 132px;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--line-2)
+        }
+
+        .qbtn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #e9eaf0;
+            border: 0;
+            border-top: 1px solid var(--line-2);
+            color: #3a3f4c;
+            cursor: pointer
+        }
+
+        .qbtn:first-child {
+            border-top: 0
+        }
+
+        .qbtn.primary {
+            background: var(--primary);
+            color: #fff
+        }
+
+        .btn.text {
+            background: transparent;
+            border-color: transparent;
+            color: var(--muted)
+        }
+    </style>
+
+    <div class="doc" style="padding-top:0">
+
+        <!-- 1. Library page: entry point -->
+        <section class="screen" id="s1">
+            <div class="frame">
+                <header class="topbar">
+                    <div class="logo"><i></i>Gallery</div>
+                    <div class="search">Search your library</div>
+                    <div class="avatar">AD</div>
+                </header>
+                <div class="shell">
+                    <aside class="side">
+                        <div class="nav">Photos</div>
+                        <div class="nav">Albums</div>
+                        <div class="nav">Spaces</div>
+                        <div class="nav-sec">Admin</div>
+                        <div class="nav">Jobs</div>
+                        <div class="nav on">Libraries</div>
+                        <div class="nav">Users</div>
+                        <div class="nav">Settings</div>
+                    </aside>
+                    <main class="main">
+                        <div class="crumb"><a>Libraries</a> / Family photos</div>
+                        <div class="page-h">
+                            <h2>Family photos</h2>
+                            <div class="right">
+                                <button class="btn sm">Scan</button>
+                                <button class="btn sm">More</button>
+                                <div class="menu">
+                                    <div class="mi">Edit</div>
+                                    <div class="mi">Scan library</div>
+                                    <div class="mi hi">Transfer owner… <span class="chip new">New</span></div>
+                                    <div class="sep"></div>
+                                    <div class="mi danger">Delete library</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card pad">
+                            <dl class="kv">
+                                <dt>Owner</dt>
+                                <dd>Jaime</dd>
+                                <dt>Path</dt>
+                                <dd class="mono">/mnt/library/family</dd>
+                                <dt>Photos and videos</dt>
+                                <dd class="mono">4,812</dd>
+                                <dt>Last scan</dt>
+                                <dd>2 hours ago</dd>
+                                <dt>Status</dt>
+                                <dd><span class="chip ok">Idle</span></dd>
+                            </dl>
+                        </div>
+                    </main>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="card pad">
-          <dl class="kv">
-            <dt>Owner</dt><dd>Jaime</dd>
-            <dt>Path</dt><dd class="mono">/mnt/library/family</dd>
-            <dt>Photos and videos</dt><dd class="mono">4,812</dd>
-            <dt>Last scan</dt><dd>2 hours ago</dd>
-            <dt>Status</dt><dd><span class="chip ok">Idle</span></dd>
-          </dl>
-        </div>
-      </main>
-    </div>
-  </div>
-</section>
+        </section>
 
-<!-- 2. Choose new owner -->
-<section class="screen" id="s2" hidden>
-  <div class="frame">
-    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
-    <div class="shell">
-      <aside class="side">
-        <div class="nav">Photos</div>
-        <div class="nav">Albums</div>
-        <div class="nav">Spaces</div>
-        <div class="nav-sec">Admin</div>
-        <div class="nav">Jobs</div>
-        <div class="nav on">Libraries</div>
-        <div class="nav">Users</div>
-        <div class="nav">Settings</div>
-      </aside>
-      <main class="main">
-        <div class="crumb"><a>Libraries</a> / Family photos</div>
-        <div class="page-h"><h2>Family photos</h2></div>
-      </main>
-    </div>
-    <div class="scrim">
-      <div class="modal">
-        <div class="modal-h"><h3>Transfer owner of Family photos</h3><div class="step">Step 1 of 3 · Choose new owner</div></div>
-        <div class="modal-b">
-          <p class="muted">New owner</p>
-          <div class="select" style="margin-top:6px"><span>Ana Lima · ana@home.example</span><span class="muted">▾</span></div>
-          <div class="stats inline">
-            <div class="stat"><b>4,812</b><span>photos and videos move</span></div>
-            <div class="stat"><b>23</b><span>people and pets copied or merged</span></div>
-            <div class="stat"><b>4</b><span>albums and stacks move with them</span></div>
-            <div class="stat"><b>4</b><span>mixed albums and stacks are split</span></div>
-          </div>
-          <div class="banner info inline"><div><b>Tell Ana first</b>Ana gets a shared space so Jaime can keep viewing these photos, read-only. Jaime keeps their favorites.</div></div>
-        </div>
-        <div class="modal-f"><span class="left">Nothing changes until you confirm</span><button class="btn">Cancel</button><button class="btn primary">Next</button></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 3. Merge people (optional) -->
-<section class="screen" id="s3" hidden>
-  <div class="frame">
-    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
-    <div class="shell">
-      <aside class="side">
-        <div class="nav">Photos</div>
-        <div class="nav">Albums</div>
-        <div class="nav">Spaces</div>
-        <div class="nav-sec">Admin</div>
-        <div class="nav">Jobs</div>
-        <div class="nav on">Libraries</div>
-        <div class="nav">Users</div>
-        <div class="nav">Settings</div>
-      </aside>
-      <main class="main">
-        <div class="crumb"><a>Libraries</a> / Family photos</div>
-        <div class="page-h"><h2>Family photos</h2></div>
-      </main>
-    </div>
-    <div class="scrim">
-      <div class="modal wide">
-        <div class="modal-h"><h3>Merge people with Ana's people</h3><div class="step">Step 2 of 3 · Optional</div></div>
-        <div class="modal-b">
-          <p class="muted">Merge a person into someone Ana already has, or copy them. Merges are suggested when the names are identical, or when Jaime and Ana both see the same person in a shared space that links this library.</p>
-          <table class="inline">
-            <thead><tr><th>Person in this library</th><th class="r">Photos</th><th>Ana's person</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><div style="display:flex;gap:10px;align-items:center"><div class="thumb"></div><b>Sofia</b></div></td>
-                <td class="r mono">312</td>
-                <td>Sofia <span class="chip ok">Same name</span></td>
-                <td><div class="seg" data-pick><span class="on">Merge</span><span>Copy</span></div></td>
-              </tr>
-              <tr>
-                <td><div style="display:flex;gap:10px;align-items:center"><div class="thumb b"></div><b>Lukas</b></div></td>
-                <td class="r mono">98</td>
-                <td class="muted">No suggestion</td>
-                <td><div class="seg" data-pick><span class="off">Merge</span><span class="on">Copy</span></div></td>
-              </tr>
-              <tr>
-                <td><div style="display:flex;gap:10px;align-items:center"><div class="thumb c"></div><b>Max · dog</b></div></td>
-                <td class="r mono">41</td>
-                <td>Max · dog <span class="chip ok">Shared space: Family</span></td>
-                <td><div class="seg" data-pick><span class="on">Merge</span><span>Copy</span></div></td>
-              </tr>
-              <tr>
-                <td><div style="display:flex;gap:10px;align-items:center"><div class="thumb d"></div><b>Unknown person 14</b></div></td>
-                <td class="r mono">17</td>
-                <td class="muted">No suggestion</td>
-                <td><div class="seg" data-pick><span class="off">Merge</span><span class="on">Copy</span></div></td>
-              </tr>
-            </tbody>
-          </table>
-          <p class="muted" style="margin-top:10px;font-size:12px">Showing 4 of 23. Copies get the name and birthday; pets also get their type and species. Hidden and favorite settings are not copied.</p>
-        </div>
-        <div class="modal-f"><span class="left">Merging is optional</span><button class="btn">Back</button><button class="btn primary">Next</button></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 4. Confirm -->
-<section class="screen" id="s4" hidden>
-  <div class="frame">
-    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
-    <div class="shell">
-      <aside class="side">
-        <div class="nav">Photos</div>
-        <div class="nav">Albums</div>
-        <div class="nav">Spaces</div>
-        <div class="nav-sec">Admin</div>
-        <div class="nav">Jobs</div>
-        <div class="nav on">Libraries</div>
-        <div class="nav">Users</div>
-        <div class="nav">Settings</div>
-      </aside>
-      <main class="main">
-        <div class="crumb"><a>Libraries</a> / Family photos</div>
-        <div class="page-h"><h2>Family photos</h2></div>
-      </main>
-    </div>
-    <div class="scrim">
-      <div class="modal">
-        <div class="modal-h"><h3>Transfer "Family photos" to Ana Lima?</h3><div class="step">Step 3 of 3 · Confirm</div></div>
-        <div class="modal-b">
-          <ul class="bullets">
-            <li>Ana Lima becomes the owner of every photo and video in this library, with their tags, and any albums or stacks that contain only these photos.</li>
-            <li>Ana Lima gets copies of the people and pets in these photos, with their names and birthdays. Hidden and favorite settings are not copied. Before you confirm, you can merge each one into a person Ana Lima already has. Jaime keeps their own people and the photos of those people in their other libraries.</li>
-            <li>A shared space owned by Ana Lima is created so Jaime can keep viewing these photos, read-only. Jaime's favorites stay with Jaime. They lose access when they leave that space or the space is deleted.</li>
-            <li>Jaime may keep seeing these photos as their own in the official Immich app until they reinstall it. Gallery apps update on their own.</li>
-            <li>Albums and stacks that also contain photos outside this library stay with Jaime. The transferred photos are removed from them.</li>
-            <li>The library cannot be scanned, and its photos cannot be edited, until the transfer finishes. If the transfer is interrupted, it resumes. If it fails, the library stays with Jaime.</li>
-            <li>When it finishes, you get a report of what moved, what was removed from mixed albums and stacks, and which people were merged or copied.</li>
-          </ul>
-        </div>
-        <div class="modal-f"><span class="left">The transfer runs in the background</span><button class="btn text">Cancel</button><button class="btn">Back</button><button class="btn primary">Transfer library</button></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 5. Running -->
-<section class="screen" id="s5" hidden>
-  <div class="frame">
-    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
-    <div class="shell">
-      <aside class="side">
-        <div class="nav">Photos</div>
-        <div class="nav">Albums</div>
-        <div class="nav">Spaces</div>
-        <div class="nav-sec">Admin</div>
-        <div class="nav">Jobs</div>
-        <div class="nav on">Libraries</div>
-        <div class="nav">Users</div>
-        <div class="nav">Settings</div>
-      </aside>
-      <main class="main">
-        <div class="crumb"><a>Libraries</a> / Family photos</div>
-        <div class="page-h"><h2>Family photos</h2><div class="right"><span class="chip warn">Transferring</span></div></div>
-        <div class="banner warn">
-          <div><b>Library is locked</b>Scans and edits are paused until the transfer finishes. Jaime can still view the library until the transfer finalizes.</div>
-        </div>
-        <div class="stepper inline">
-          <div class="st done"><b>Queued</b><span>Done · 10:42</span></div>
-          <div class="st now"><b>Running</b><span>Batch 3 of 5</span></div>
-          <div class="st"><b>Finalizing</b><span>Changes the owner</span></div>
-          <div class="st"><b>Done</b><span>Report ready</span></div>
-        </div>
-        <div class="card pad">
-          <div style="display:flex;justify-content:space-between;font-size:13px"><b>2,000 of 4,812 assets moved</b><span class="muted mono">42%</span></div>
-          <div class="bar"><span style="width:42%"></span></div>
-          <div class="batches">
-            <div class="ok">1</div><div class="ok">2</div><div class="now">3</div><div>4</div><div>5</div>
-          </div>
-          <p class="muted" style="margin-top:12px;font-size:12px">Batches of 1,000. Each batch is saved on its own, so an interrupted transfer resumes where it stopped.</p>
-        </div>
-      </main>
-    </div>
-  </div>
-</section>
-
-<!-- 7. Interrupted or failed -->
-<section class="screen" id="s6" hidden>
-  <div class="frame">
-    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
-    <div class="shell">
-      <aside class="side">
-        <div class="nav">Photos</div>
-        <div class="nav">Albums</div>
-        <div class="nav">Spaces</div>
-        <div class="nav-sec">Admin</div>
-        <div class="nav">Jobs</div>
-        <div class="nav on">Libraries</div>
-        <div class="nav">Users</div>
-        <div class="nav">Settings</div>
-      </aside>
-      <main class="main">
-        <div class="crumb"><a>Libraries</a> / Family photos</div>
-        <div class="page-h"><h2>Family photos</h2></div>
-        <div class="cols2">
-          <div class="card pad">
-            <div style="display:flex;justify-content:space-between;align-items:center"><b>Interrupted</b><span class="chip warn">Will resume</span></div>
-            <p class="inline" style="font-size:13px">The server restarted during batch 3 of 5. The transfer resumes on its own. Batches already saved are not moved again.</p>
-            <div class="bar"><span style="width:42%"></span></div>
-            <p class="muted" style="font-size:12px">2,000 of 4,812 assets moved</p>
-            <div style="display:flex;gap:8px;margin-top:14px"><button class="btn primary sm">Resume now</button><button class="btn sm">Details</button></div>
-          </div>
-          <div class="card pad">
-            <div style="display:flex;justify-content:space-between;align-items:center"><b>Failed</b><span class="chip bad">Stopped</span></div>
-            <p class="inline" style="font-size:13px">The transfer failed before finalization. A failure before finalization leaves the library with Jaime. Nothing is final.</p>
-            <p class="muted" style="font-size:12px;margin-top:10px">Retry runs the transfer again from the last saved batch.</p>
-            <div style="display:flex;gap:8px;margin-top:14px"><button class="btn primary sm">Retry</button><button class="btn sm">Details</button></div>
-          </div>
-        </div>
-      </main>
-    </div>
-  </div>
-</section>
-
-<!-- 8. Report -->
-<section class="screen" id="s7" hidden>
-  <div class="frame">
-    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
-    <div class="shell">
-      <aside class="side">
-        <div class="nav">Photos</div>
-        <div class="nav">Albums</div>
-        <div class="nav">Spaces</div>
-        <div class="nav-sec">Admin</div>
-        <div class="nav">Jobs</div>
-        <div class="nav on">Libraries</div>
-        <div class="nav">Users</div>
-        <div class="nav">Settings</div>
-      </aside>
-      <main class="main">
-        <div class="crumb"><a>Libraries</a> / Family photos</div>
-        <div class="page-h"><h2>Family photos</h2><div class="right"><span class="chip ok">Transferred</span></div></div>
-        <div class="banner ok">
-          <div><b>Transfer complete</b>Family photos now belongs to Ana Lima. Jaime can still view it, read-only, through the shared space "Family photos (shared)".</div>
-        </div>
-        <div class="stats inline">
-          <div class="stat"><b>4,812</b><span>assets moved</span></div>
-          <div class="stat"><b>23</b><span>people and pets</span></div>
-          <div class="stat"><b>6</b><span>merged into Ana's people</span></div>
-          <div class="stat"><b>17</b><span>copied</span></div>
-        </div>
-        <div class="cols2 inline">
-          <div class="card pad">
-            <b>Albums and stacks</b>
-            <ul class="report-list" style="margin-top:8px">
-              <li><span>Trip to Lisbon · only these photos</span><span class="chip ok">Moved</span></li>
-              <li><span>Summer 2024 · only these photos</span><span class="chip ok">Moved</span></li>
-              <li><span>Stack IMG_3001 · only these photos</span><span class="chip ok">Moved</span></li>
-              <li><span>Kids · also has other photos</span><span class="chip warn">Photos removed</span></li>
-              <li><span>Pets · also has other photos</span><span class="chip warn">Photos removed</span></li>
-              <li><span>Stack IMG_2041 · mixed</span><span class="chip warn">Split</span></li>
-            </ul>
-          </div>
-          <div class="card pad">
-            <b>People and pets</b>
-            <ul class="report-list" style="margin-top:8px">
-              <li><span>Sofia · merged into Sofia</span><span class="chip ok">Merged</span></li>
-              <li><span>Max · dog · merged into Max · dog</span><span class="chip ok">Merged</span></li>
-              <li><span>Lukas · copied</span><span class="chip new">Copied</span></li>
-              <li><span>Unknown person 14 · copied</span><span class="chip new">Copied</span></li>
-              <li><span class="muted">+19 more in the full report</span><span></span></li>
-            </ul>
-          </div>
-        </div>
-      </main>
-    </div>
-  </div>
-</section>
-
-<!-- 6. Jobs page -->
-<section class="screen" id="s8" hidden>
-  <div class="frame">
-    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
-    <div class="shell">
-      <aside class="side">
-        <div class="nav">Photos</div>
-        <div class="nav">Albums</div>
-        <div class="nav">Spaces</div>
-        <div class="nav-sec">Admin</div>
-        <div class="nav on">Jobs</div>
-        <div class="nav">Libraries</div>
-        <div class="nav">Users</div>
-        <div class="nav">Settings</div>
-      </aside>
-      <main class="main">
-        <div class="crumb"><a>Admin</a> / Jobs</div>
-        <div class="page-h"><h2>Jobs</h2></div>
-        <p class="muted" style="font-size:13px;margin-top:6px">A transfer appears as a card in the same layout as a queue. Its counts and actions differ, because it moves one library rather than a queue of jobs.</p>
-
-        <div class="qcard">
-          <div class="qmain">
-            <div class="qhead"><span class="qtitle">Thumbnail generation</span><span class="chip ok">Active</span></div>
-            <p class="muted" style="font-size:13px">Creates previews for new photos and videos.</p>
-            <div class="qtiles"><div class="qtile a"><span>Active</span><b>12</b></div><div class="qtile w"><span>Waiting</span><b>300</b></div></div>
-          </div>
-          <div class="qside"><button class="qbtn">Clear</button><button class="qbtn">Pause</button></div>
-        </div>
-
-        <div class="qcard">
-          <div class="qmain">
-            <div class="qhead"><span class="qtitle">Owner transfer: Family photos</span><span class="chip ok">Active</span></div>
-            <p class="muted" style="font-size:13px">Jaime to Ana Lima · started 10:42</p>
-            <div class="qtiles"><div class="qtile a"><span>Moved</span><b>2,000</b></div><div class="qtile w"><span>Remaining</span><b>2,812</b></div></div>
-            <div class="qtable">
-              <div class="qrow h"><span>Step</span><span>In progress</span><span>Queued</span></div>
-              <div class="qrow"><span>Move assets, batch 3 of 5</span><span>1</span><span>2</span></div>
-              <div class="qrow"><span>Finalize owner</span><span>0</span><span>1</span></div>
+        <!-- 2. Choose new owner -->
+        <section class="screen" id="s2" hidden>
+            <div class="frame">
+                <header class="topbar">
+                    <div class="logo"><i></i>Gallery</div>
+                    <div class="search">Search your library</div>
+                    <div class="avatar">AD</div>
+                </header>
+                <div class="shell">
+                    <aside class="side">
+                        <div class="nav">Photos</div>
+                        <div class="nav">Albums</div>
+                        <div class="nav">Spaces</div>
+                        <div class="nav-sec">Admin</div>
+                        <div class="nav">Jobs</div>
+                        <div class="nav on">Libraries</div>
+                        <div class="nav">Users</div>
+                        <div class="nav">Settings</div>
+                    </aside>
+                    <main class="main">
+                        <div class="crumb"><a>Libraries</a> / Family photos</div>
+                        <div class="page-h">
+                            <h2>Family photos</h2>
+                        </div>
+                    </main>
+                </div>
+                <div class="scrim">
+                    <div class="modal">
+                        <div class="modal-h">
+                            <h3>Transfer owner of Family photos</h3>
+                            <div class="step">Step 1 of 3 · Choose new owner</div>
+                        </div>
+                        <div class="modal-b">
+                            <p class="muted">New owner</p>
+                            <div class="select" style="margin-top:6px"><span>Ana Lima · ana@home.example</span><span
+                                    class="muted">▾</span></div>
+                            <div class="stats inline">
+                                <div class="stat"><b>4,812</b><span>photos and videos move</span></div>
+                                <div class="stat"><b>23</b><span>people and pets copied or merged</span></div>
+                                <div class="stat"><b>4</b><span>albums and stacks move with them</span></div>
+                                <div class="stat"><b>4</b><span>mixed albums and stacks are split</span></div>
+                            </div>
+                            <div class="banner info inline">
+                                <div><b>Tell Ana first</b>Ana gets a shared space so Jaime can keep viewing these
+                                    photos, read-only. Jaime keeps their favorites.</div>
+                            </div>
+                        </div>
+                        <div class="modal-f"><span class="left">Nothing changes until you confirm</span><button
+                                class="btn">Cancel</button><button class="btn primary">Next</button></div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="qside"><button class="qbtn">Details</button></div>
-        </div>
+        </section>
 
-        <div class="qcard">
-          <div class="qmain">
-            <div class="qhead"><span class="qtitle">Owner transfer: Harbor trips</span><span class="chip warn">Interrupted</span></div>
-            <p class="muted" style="font-size:13px">Jaime to Ana Lima · server restarted at batch 2 of 3 · resumes automatically</p>
-            <div class="qtiles"><div class="qtile a"><span>Moved</span><b>1,000</b></div><div class="qtile w"><span>Remaining</span><b>1,300</b></div></div>
-          </div>
-          <div class="qside"><button class="qbtn primary">Resume now</button><button class="qbtn">Details</button></div>
-        </div>
-      </main>
+        <!-- 3. Merge people (optional) -->
+        <section class="screen" id="s3" hidden>
+            <div class="frame">
+                <header class="topbar">
+                    <div class="logo"><i></i>Gallery</div>
+                    <div class="search">Search your library</div>
+                    <div class="avatar">AD</div>
+                </header>
+                <div class="shell">
+                    <aside class="side">
+                        <div class="nav">Photos</div>
+                        <div class="nav">Albums</div>
+                        <div class="nav">Spaces</div>
+                        <div class="nav-sec">Admin</div>
+                        <div class="nav">Jobs</div>
+                        <div class="nav on">Libraries</div>
+                        <div class="nav">Users</div>
+                        <div class="nav">Settings</div>
+                    </aside>
+                    <main class="main">
+                        <div class="crumb"><a>Libraries</a> / Family photos</div>
+                        <div class="page-h">
+                            <h2>Family photos</h2>
+                        </div>
+                    </main>
+                </div>
+                <div class="scrim">
+                    <div class="modal wide">
+                        <div class="modal-h">
+                            <h3>Merge people with Ana's people</h3>
+                            <div class="step">Step 2 of 3 · Optional</div>
+                        </div>
+                        <div class="modal-b">
+                            <p class="muted">Merge a person into someone Ana already has, or copy them. Merges are
+                                suggested when the names are identical, or when Jaime and Ana both see the same person
+                                in a shared space that links this library.</p>
+                            <table class="inline">
+                                <thead>
+                                    <tr>
+                                        <th>Person in this library</th>
+                                        <th class="r">Photos</th>
+                                        <th>Ana's person</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div style="display:flex;gap:10px;align-items:center">
+                                                <div class="thumb"></div><b>Sofia</b>
+                                            </div>
+                                        </td>
+                                        <td class="r mono">312</td>
+                                        <td>Sofia <span class="chip ok">Same name</span></td>
+                                        <td>
+                                            <div class="seg" data-pick><span class="on">Merge</span><span>Copy</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display:flex;gap:10px;align-items:center">
+                                                <div class="thumb b"></div><b>Lukas</b>
+                                            </div>
+                                        </td>
+                                        <td class="r mono">98</td>
+                                        <td class="muted">No suggestion</td>
+                                        <td>
+                                            <div class="seg" data-pick><span class="off">Merge</span><span
+                                                    class="on">Copy</span></div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display:flex;gap:10px;align-items:center">
+                                                <div class="thumb c"></div><b>Max · dog</b>
+                                            </div>
+                                        </td>
+                                        <td class="r mono">41</td>
+                                        <td>Max · dog <span class="chip ok">Shared space: Family</span></td>
+                                        <td>
+                                            <div class="seg" data-pick><span class="on">Merge</span><span>Copy</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display:flex;gap:10px;align-items:center">
+                                                <div class="thumb d"></div><b>Unknown person 14</b>
+                                            </div>
+                                        </td>
+                                        <td class="r mono">17</td>
+                                        <td class="muted">No suggestion</td>
+                                        <td>
+                                            <div class="seg" data-pick><span class="off">Merge</span><span
+                                                    class="on">Copy</span></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="muted" style="margin-top:10px;font-size:12px">Showing 4 of 23. Copies get the name
+                                and birthday; pets also get their type and species. Hidden and favorite settings are not
+                                copied.</p>
+                        </div>
+                        <div class="modal-f"><span class="left">Merging is optional</span><button
+                                class="btn">Back</button><button class="btn primary">Next</button></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Confirm -->
+        <section class="screen" id="s4" hidden>
+            <div class="frame">
+                <header class="topbar">
+                    <div class="logo"><i></i>Gallery</div>
+                    <div class="search">Search your library</div>
+                    <div class="avatar">AD</div>
+                </header>
+                <div class="shell">
+                    <aside class="side">
+                        <div class="nav">Photos</div>
+                        <div class="nav">Albums</div>
+                        <div class="nav">Spaces</div>
+                        <div class="nav-sec">Admin</div>
+                        <div class="nav">Jobs</div>
+                        <div class="nav on">Libraries</div>
+                        <div class="nav">Users</div>
+                        <div class="nav">Settings</div>
+                    </aside>
+                    <main class="main">
+                        <div class="crumb"><a>Libraries</a> / Family photos</div>
+                        <div class="page-h">
+                            <h2>Family photos</h2>
+                        </div>
+                    </main>
+                </div>
+                <div class="scrim">
+                    <div class="modal">
+                        <div class="modal-h">
+                            <h3>Transfer "Family photos" to Ana Lima?</h3>
+                            <div class="step">Step 3 of 3 · Confirm</div>
+                        </div>
+                        <div class="modal-b">
+                            <ul class="bullets">
+                                <li>Ana Lima becomes the owner of every photo and video in this library, with their
+                                    tags, and any albums or stacks that contain only these photos.</li>
+                                <li>Ana Lima gets copies of the people and pets in these photos, with their names and
+                                    birthdays. Hidden and favorite settings are not copied. Before you confirm, you can
+                                    merge each one into a person Ana Lima already has. Jaime keeps their own people and
+                                    the photos of those people in their other libraries.</li>
+                                <li>A shared space owned by Ana Lima is created so Jaime can keep viewing these photos,
+                                    read-only. Jaime's favorites stay with Jaime. They lose access when they leave that
+                                    space or the space is deleted.</li>
+                                <li>Jaime may keep seeing these photos as their own in the official Immich app until
+                                    they reinstall it. Gallery apps update on their own.</li>
+                                <li>Albums and stacks that also contain photos outside this library stay with Jaime. The
+                                    transferred photos are removed from them.</li>
+                                <li>The library cannot be scanned, and its photos cannot be edited, until the transfer
+                                    finishes. If the transfer is interrupted, it resumes. If it fails, the library stays
+                                    with Jaime.</li>
+                                <li>When it finishes, you get a report of what moved, what was removed from mixed albums
+                                    and stacks, and which people were merged or copied.</li>
+                            </ul>
+                        </div>
+                        <div class="modal-f"><span class="left">The transfer runs in the background</span><button
+                                class="btn text">Cancel</button><button class="btn">Back</button><button
+                                class="btn primary">Transfer library</button></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Running -->
+        <section class="screen" id="s5" hidden>
+            <div class="frame">
+                <header class="topbar">
+                    <div class="logo"><i></i>Gallery</div>
+                    <div class="search">Search your library</div>
+                    <div class="avatar">AD</div>
+                </header>
+                <div class="shell">
+                    <aside class="side">
+                        <div class="nav">Photos</div>
+                        <div class="nav">Albums</div>
+                        <div class="nav">Spaces</div>
+                        <div class="nav-sec">Admin</div>
+                        <div class="nav">Jobs</div>
+                        <div class="nav on">Libraries</div>
+                        <div class="nav">Users</div>
+                        <div class="nav">Settings</div>
+                    </aside>
+                    <main class="main">
+                        <div class="crumb"><a>Libraries</a> / Family photos</div>
+                        <div class="page-h">
+                            <h2>Family photos</h2>
+                            <div class="right"><span class="chip warn">Transferring</span></div>
+                        </div>
+                        <div class="banner warn">
+                            <div><b>Library is locked</b>Scans and edits are paused until the transfer finishes. Jaime
+                                can still view the library until the transfer finalizes.</div>
+                        </div>
+                        <div class="stepper inline">
+                            <div class="st done"><b>Queued</b><span>Done · 10:42</span></div>
+                            <div class="st now"><b>Running</b><span>Batch 3 of 5</span></div>
+                            <div class="st"><b>Finalizing</b><span>Changes the owner</span></div>
+                            <div class="st"><b>Done</b><span>Report ready</span></div>
+                        </div>
+                        <div class="card pad">
+                            <div style="display:flex;justify-content:space-between;font-size:13px"><b>2,000 of 4,812
+                                    assets moved</b><span class="muted mono">42%</span></div>
+                            <div class="bar"><span style="width:42%"></span></div>
+                            <div class="batches">
+                                <div class="ok">1</div>
+                                <div class="ok">2</div>
+                                <div class="now">3</div>
+                                <div>4</div>
+                                <div>5</div>
+                            </div>
+                            <p class="muted" style="margin-top:12px;font-size:12px">Batches of 1,000. Each batch is
+                                saved on its own, so an interrupted transfer resumes where it stopped.</p>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Interrupted or failed -->
+        <section class="screen" id="s6" hidden>
+            <div class="frame">
+                <header class="topbar">
+                    <div class="logo"><i></i>Gallery</div>
+                    <div class="search">Search your library</div>
+                    <div class="avatar">AD</div>
+                </header>
+                <div class="shell">
+                    <aside class="side">
+                        <div class="nav">Photos</div>
+                        <div class="nav">Albums</div>
+                        <div class="nav">Spaces</div>
+                        <div class="nav-sec">Admin</div>
+                        <div class="nav">Jobs</div>
+                        <div class="nav on">Libraries</div>
+                        <div class="nav">Users</div>
+                        <div class="nav">Settings</div>
+                    </aside>
+                    <main class="main">
+                        <div class="crumb"><a>Libraries</a> / Family photos</div>
+                        <div class="page-h">
+                            <h2>Family photos</h2>
+                        </div>
+                        <div class="cols2">
+                            <div class="card pad">
+                                <div style="display:flex;justify-content:space-between;align-items:center">
+                                    <b>Interrupted</b><span class="chip warn">Will resume</span></div>
+                                <p class="inline" style="font-size:13px">The server restarted during batch 3 of 5. The
+                                    transfer resumes on its own. Batches already saved are not moved again.</p>
+                                <div class="bar"><span style="width:42%"></span></div>
+                                <p class="muted" style="font-size:12px">2,000 of 4,812 assets moved</p>
+                                <div style="display:flex;gap:8px;margin-top:14px"><button class="btn primary sm">Resume
+                                        now</button><button class="btn sm">Details</button></div>
+                            </div>
+                            <div class="card pad">
+                                <div style="display:flex;justify-content:space-between;align-items:center">
+                                    <b>Failed</b><span class="chip bad">Stopped</span></div>
+                                <p class="inline" style="font-size:13px">The transfer failed before finalization. A
+                                    failure before finalization leaves the library with Jaime. Nothing is final.</p>
+                                <p class="muted" style="font-size:12px;margin-top:10px">Retry runs the transfer again
+                                    from the last saved batch.</p>
+                                <div style="display:flex;gap:8px;margin-top:14px"><button
+                                        class="btn primary sm">Retry</button><button class="btn sm">Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. Report -->
+        <section class="screen" id="s7" hidden>
+            <div class="frame">
+                <header class="topbar">
+                    <div class="logo"><i></i>Gallery</div>
+                    <div class="search">Search your library</div>
+                    <div class="avatar">AD</div>
+                </header>
+                <div class="shell">
+                    <aside class="side">
+                        <div class="nav">Photos</div>
+                        <div class="nav">Albums</div>
+                        <div class="nav">Spaces</div>
+                        <div class="nav-sec">Admin</div>
+                        <div class="nav">Jobs</div>
+                        <div class="nav on">Libraries</div>
+                        <div class="nav">Users</div>
+                        <div class="nav">Settings</div>
+                    </aside>
+                    <main class="main">
+                        <div class="crumb"><a>Libraries</a> / Family photos</div>
+                        <div class="page-h">
+                            <h2>Family photos</h2>
+                            <div class="right"><span class="chip ok">Transferred</span></div>
+                        </div>
+                        <div class="banner ok">
+                            <div><b>Transfer complete</b>Family photos now belongs to Ana Lima. Jaime can still view it,
+                                read-only, through the shared space "Family photos (shared)".</div>
+                        </div>
+                        <div class="stats inline">
+                            <div class="stat"><b>4,812</b><span>assets moved</span></div>
+                            <div class="stat"><b>23</b><span>people and pets</span></div>
+                            <div class="stat"><b>6</b><span>merged into Ana's people</span></div>
+                            <div class="stat"><b>17</b><span>copied</span></div>
+                        </div>
+                        <div class="cols2 inline">
+                            <div class="card pad">
+                                <b>Albums and stacks</b>
+                                <ul class="report-list" style="margin-top:8px">
+                                    <li><span>Trip to Lisbon · only these photos</span><span
+                                            class="chip ok">Moved</span></li>
+                                    <li><span>Summer 2024 · only these photos</span><span class="chip ok">Moved</span>
+                                    </li>
+                                    <li><span>Stack IMG_3001 · only these photos</span><span
+                                            class="chip ok">Moved</span></li>
+                                    <li><span>Kids · also has other photos</span><span class="chip warn">Photos
+                                            removed</span></li>
+                                    <li><span>Pets · also has other photos</span><span class="chip warn">Photos
+                                            removed</span></li>
+                                    <li><span>Stack IMG_2041 · mixed</span><span class="chip warn">Split</span></li>
+                                </ul>
+                            </div>
+                            <div class="card pad">
+                                <b>People and pets</b>
+                                <ul class="report-list" style="margin-top:8px">
+                                    <li><span>Sofia · merged into Sofia</span><span class="chip ok">Merged</span></li>
+                                    <li><span>Max · dog · merged into Max · dog</span><span
+                                            class="chip ok">Merged</span></li>
+                                    <li><span>Lukas · copied</span><span class="chip new">Copied</span></li>
+                                    <li><span>Unknown person 14 · copied</span><span class="chip new">Copied</span></li>
+                                    <li><span class="muted">+19 more in the full report</span><span></span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Jobs page -->
+        <section class="screen" id="s8" hidden>
+            <div class="frame">
+                <header class="topbar">
+                    <div class="logo"><i></i>Gallery</div>
+                    <div class="search">Search your library</div>
+                    <div class="avatar">AD</div>
+                </header>
+                <div class="shell">
+                    <aside class="side">
+                        <div class="nav">Photos</div>
+                        <div class="nav">Albums</div>
+                        <div class="nav">Spaces</div>
+                        <div class="nav-sec">Admin</div>
+                        <div class="nav on">Jobs</div>
+                        <div class="nav">Libraries</div>
+                        <div class="nav">Users</div>
+                        <div class="nav">Settings</div>
+                    </aside>
+                    <main class="main">
+                        <div class="crumb"><a>Admin</a> / Jobs</div>
+                        <div class="page-h">
+                            <h2>Jobs</h2>
+                        </div>
+                        <p class="muted" style="font-size:13px;margin-top:6px">A transfer appears as a card in the same
+                            layout as a queue. Its counts and actions differ, because it moves one library rather than a
+                            queue of jobs.</p>
+
+                        <div class="qcard">
+                            <div class="qmain">
+                                <div class="qhead"><span class="qtitle">Thumbnail generation</span><span
+                                        class="chip ok">Active</span></div>
+                                <p class="muted" style="font-size:13px">Creates previews for new photos and videos.</p>
+                                <div class="qtiles">
+                                    <div class="qtile a"><span>Active</span><b>12</b></div>
+                                    <div class="qtile w"><span>Waiting</span><b>300</b></div>
+                                </div>
+                            </div>
+                            <div class="qside"><button class="qbtn">Clear</button><button class="qbtn">Pause</button>
+                            </div>
+                        </div>
+
+                        <div class="qcard">
+                            <div class="qmain">
+                                <div class="qhead"><span class="qtitle">Owner transfer: Family photos</span><span
+                                        class="chip ok">Active</span></div>
+                                <p class="muted" style="font-size:13px">Jaime to Ana Lima · started 10:42</p>
+                                <div class="qtiles">
+                                    <div class="qtile a"><span>Moved</span><b>2,000</b></div>
+                                    <div class="qtile w"><span>Remaining</span><b>2,812</b></div>
+                                </div>
+                                <div class="qtable">
+                                    <div class="qrow h"><span>Step</span><span>In progress</span><span>Queued</span>
+                                    </div>
+                                    <div class="qrow"><span>Move assets, batch 3 of 5</span><span>1</span><span>2</span>
+                                    </div>
+                                    <div class="qrow"><span>Finalize owner</span><span>0</span><span>1</span></div>
+                                </div>
+                            </div>
+                            <div class="qside"><button class="qbtn">Details</button></div>
+                        </div>
+
+                        <div class="qcard">
+                            <div class="qmain">
+                                <div class="qhead"><span class="qtitle">Owner transfer: Harbor trips</span><span
+                                        class="chip warn">Interrupted</span></div>
+                                <p class="muted" style="font-size:13px">Jaime to Ana Lima · server restarted at batch 2
+                                    of 3 · resumes automatically</p>
+                                <div class="qtiles">
+                                    <div class="qtile a"><span>Moved</span><b>1,000</b></div>
+                                    <div class="qtile w"><span>Remaining</span><b>1,300</b></div>
+                                </div>
+                            </div>
+                            <div class="qside"><button class="qbtn primary">Resume now</button><button
+                                    class="qbtn">Details</button></div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
     </div>
-  </div>
-</section>
 
-</div>
-
-<script>
-const tabs = [...document.querySelectorAll('.tab')];
-tabs.forEach(t => t.addEventListener('click', () => {
-  tabs.forEach(x => x.setAttribute('aria-selected', String(x === t)));
-  document.querySelectorAll('.screen').forEach(s => { s.hidden = s.id !== t.dataset.t; });
-}));
-document.querySelectorAll('.seg[data-pick]').forEach(seg => {
-  const opts = [...seg.querySelectorAll('span')];
-  opts.forEach(opt => opt.addEventListener('click', () => {
-    if (opt.classList.contains('off')) return;
-    opts.forEach(x => x.classList.toggle('on', x === opt));
-  }));
-});
-</script>
+    <script>
+        const tabs = [...document.querySelectorAll('.tab')];
+        tabs.forEach(t => t.addEventListener('click', () => {
+            tabs.forEach(x => x.setAttribute('aria-selected', String(x === t)));
+            document.querySelectorAll('.screen').forEach(s => { s.hidden = s.id !== t.dataset.t; });
+        }));
+        document.querySelectorAll('.seg[data-pick]').forEach(seg => {
+            const opts = [...seg.querySelectorAll('span')];
+            opts.forEach(opt => opt.addEventListener('click', () => {
+                if (opt.classList.contains('off')) return;
+                opts.forEach(x => x.classList.toggle('on', x === opt));
+            }));
+        });
+    </script>
 </body>
+
 </html>
