@@ -4,7 +4,7 @@ Date: 2026-11-05
 
 ## Status
 
-Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)), including the admin-facing wording in Decision 7. Decision 5 (people) and Decision 7 were amended on 2026-11-08: transfers copy people rather than moving person groups, and the admin gets an optional people-matching step before confirming. Implementation has not started. Admin flow mockups: [library-owner-transfer.html](mockups/2026-11-05-external-library-owner-transfer/library-owner-transfer.html). The former owner's fork-client sync path is read on code and converges through a bumped `asset.updateId`; stock-client staleness is accepted (see the verify list), and a pre-transfer checkpoint test remains open.
+Decisions recorded on 2026-11-07 from owner review (see [Decisions](#decisions)), including the admin-facing wording in Decision 7. Decision 5 (people) and Decision 7 were amended on 2026-11-08: transfers copy people rather than moving person groups, and the admin gets an optional people-merging step before confirming. Implementation has not started. Admin flow mockups: [library-owner-transfer.html](mockups/2026-11-05-external-library-owner-transfer/library-owner-transfer.html). The former owner's fork-client sync path is read on code and converges through a bumped `asset.updateId`; stock-client staleness is accepted (see the verify list), and a pre-transfer checkpoint test remains open.
 
 ## Problem
 
@@ -77,8 +77,8 @@ User-scoped associations follow the rules recorded in [Decisions](#decisions):
 
 - Tags: map each transferred asset's tag links by name to the new owner's tags, creating missing tags and keeping hierarchy. Remove links from transferred assets to the former owner's tags. The former owner's tag rows stay unchanged for their other assets.
 - Favorites: the former owner's `asset_favorite` rows are not touched, and the former owner keeps them visible through the retained shared-space access. The new owner's `asset.isFavorite` projection is recomputed from the new owner's overlay, so the new owner starts with no favorites.
-- Albums and stacks that mix library and non-library assets are split at the transferred assets, not moved whole. People are copied or matched, not moved (Decision 5).
-- Faces: keep each `asset_face` row and its `shared_space_person_face` and `shared_space_person` links. Point each transferred face at a person owned by the new owner: a copy of its former person (name and birthday), or an existing new-owner person the admin matched before confirming (see Decision 5).
+- Albums and stacks that mix library and non-library assets are split at the transferred assets, not moved whole. People are copied or merged, not moved (Decision 5).
+- Faces: keep each `asset_face` row and its `shared_space_person_face` and `shared_space_person` links. Point each transferred face at a person owned by the new owner: a copy of its former person (name and birthday), or an existing new-owner person the admin merged into before confirming (see Decision 5).
 - Sync grants: the owner grant is insert-only (`library_after_insert`), so finalization inserts the new owner's `library_user` row with the default `createId`. A `library_audit` row for the former owner is written only when no other access path remains, because `library_user_delete_after_audit` deletes the (userId, libraryId) row unconditionally and that row is shared by the owner and space paths. Finalization also bumps `library.updateId`, each transferred asset's `updateId`, and each transferred face's `updateId`. The face stream is cursored by `asset_face.updateId` and has no backfill, so without the face bump the new owner's clients never receive those faces.
 
 Large libraries use the resumable job in [Decisions](#decisions). A single transaction over every asset and face row is rejected: it holds locks and WAL for the whole transfer, and clients could observe a partial state.
@@ -116,8 +116,8 @@ The transfer must be covered by tests that verify both retained metadata and acc
 
 - A transfer keeps the same library and asset IDs, EXIF rows, supported edits, trims, face detections, and valid relationships.
 - The target owner can read and manage the transferred assets. The former owner has no ownership rights and reads them only through the retained shared space; removing that membership removes their access.
-- Tag, favorite, album, stack, person, and linked-space behavior matches [Decisions](#decisions), including assets and people that also exist outside the transferred library. Mixed albums and stacks are split, not moved whole, and people are copied or matched rather than moved.
-- Transferred faces are copied to new-owner persons with the source name and birthday (and pet type and species). Hidden, favorite, and identity links are not copied. A confirmed match reuses the chosen new-owner person. The former owner's person groups and their remaining faces are unchanged, and shared-space person rows are unchanged.
+- Tag, favorite, album, stack, person, and linked-space behavior matches [Decisions](#decisions), including assets and people that also exist outside the transferred library. Mixed albums and stacks are split, not moved whole, and people are copied or merged rather than moved.
+- Transferred faces are copied to new-owner persons with the source name and birthday (and pet type and species). Hidden, favorite, and identity links are not copied. A confirmed merge reuses the chosen new-owner person. The former owner's person groups and their remaining faces are unchanged, and shared-space person rows are unchanged.
 - Shares on the former owner's person groups are unchanged, including a share to the new owner. Copied persons have no shares, so the self-share check is never reached.
 - The old and new users receive correct library/asset sync state after reconnecting from checkpoints created before transfer. Test the case where neither client is online during transfer. The new owner's clients must also receive the transferred faces, which requires the face `updateId` bump.
 - A failed, interrupted, or retried job cannot leave assets owned by a different account than their library, leave stale access grants, or make the library visible to the new owner before finalization. A retry resumes from the last committed batch.
@@ -143,19 +143,19 @@ Recorded on 2026-11-07 from owner review.
    The owner confirmed the album, stack, and people rules on 2026-11-07. The people rule was amended on 2026-11-08 (Decision 5).
 5. **People.** Each transferred face keeps its `asset_face` row ID, so `shared_space_person_face` and `shared_space_person.faceAssetId` links survive. Each face is re-pointed to a person owned by the new owner. The former owner's person groups are not moved: they keep their faces on assets outside the library, and the former owner keeps seeing those people there. The existing space/library face reconciliation is queued for linked spaces after finalization. (Amended 2026-11-08: this replaces the earlier rule that moved whole person groups.)
 
-   Before confirming, the admin sees a people-matching step (Decision 7). For each person with faces in the library, it proposes an existing new-owner person as a match when the names are identical, or when both users are in a shared space that links the library and that space shows the same person. The admin confirms or changes each match; this is optional. A confirmed match re-points the transferred faces to that person, and its own name, birthday, and settings are left as they are. Any other person gets a copy with the former person's name and birthday, and pet type and species for pets. Hidden, favorite, and identity-link settings are not copied, so existing identities of the new owner are not affected. Shares on the former owner's person groups are unchanged. The transfer creates no shares. The space-match rule is accepted as written (2026-11-08). Later merges use the existing same-owner merge (2026-11-08).
+   Before confirming, the admin sees a people-merging step (Decision 7). For each person with faces in the library, it proposes an existing new-owner person as a merge target when the names are identical, or when both users are in a shared space that links the library and that space shows the same person. The admin confirms or changes each merge; this is optional. A confirmed merge re-points the transferred faces to that person, and its own name, birthday, and settings are left as they are. Any other person gets a copy with the former person's name and birthday, and pet type and species for pets. Hidden, favorite, and identity-link settings are not copied, so existing identities of the new owner are not affected. Shares on the former owner's person groups are unchanged. The transfer creates no shares. The space-suggestion rule is accepted as written (2026-11-08). Later merges use the existing same-owner merge (2026-11-08). The transfer-time merge is a one-off repoint within this transfer, not that later merge.
 6. **Transfer runs as a job.** States: queued, running, finalizing, done, failed. While the job runs, the library is marked transferring, and scans, sidecar writes, and owner-scoped writes to its assets are blocked. Batches of 1,000 assets are keyed by asset ID, committed independently, and idempotent, so a retry resumes from the last batch. Reads continue during the run, and visibility changes only at finalization. The owner accepted this window on 2026-11-07. Finalization is the only step that changes visibility. It sets `library.ownerId`, inserts the new owner's `library_user` row, writes the former owner's `library_audit` row only when no other path remains, and bumps `library.updateId`. A failure before finalization leaves the library with its former owner. A reverse run restores that owner, since asset IDs are unchanged.
 7. **What the admin is told.** The confirmation dialog states the following before the admin confirms. Plain language; no storage terms. The English text is the source for the overlay strings in the nine maintained locales.
 
    > **Transfer "{library}" to {new owner}?**
    >
    > - {new owner} becomes the owner of every photo and video in this library, with their tags, and any albums or stacks that contain only these photos.
-   > - {new owner} gets copies of the people and pets in these photos, with their names and birthdays. Hidden and favorite settings are not copied. Before you confirm, you can match each one to a person {new owner} already has. {former owner} keeps their own people and the photos of those people in their other libraries.
+   > - {new owner} gets copies of the people and pets in these photos, with their names and birthdays. Hidden and favorite settings are not copied. Before you confirm, you can merge each one into a person {new owner} already has. {former owner} keeps their own people and the photos of those people in their other libraries.
    > - A shared space owned by {new owner} is created so {former owner} can keep viewing these photos, read-only. {former owner}'s favorites stay with them. They lose access when they leave that space or the space is deleted.
    > - {former owner} may keep seeing these photos as their own in the official Immich app until they reinstall it. Gallery apps update on their own.
    > - Albums and stacks that also contain photos outside this library stay with {former owner}. The transferred photos are removed from them.
    > - The library cannot be scanned, and its photos cannot be edited, until the transfer finishes. If the transfer is interrupted, it resumes. If it fails, the library stays with {former owner}.
-   > - When it finishes, you get a report of what moved, what was removed from mixed albums and stacks, and which people were matched or copied.
+   > - When it finishes, you get a report of what moved, what was removed from mixed albums and stacks, and which people were merged or copied.
 
 Verify before implementation. Decisions 2 and 5 depend on these:
 
@@ -167,11 +167,196 @@ Verify before implementation. Decisions 2 and 5 depend on these:
   - `AssetSync.getDeletes` reads `asset_audit`, which only `asset_delete_audit` writes, on physical DELETE. An owner change emits no audit row, so no delete reaches the former owner through the own-assets stream.
   - `LibraryAssetSync.getUpserts` (`server/src/gallery/repositories/gallery-sync.repository.ts`, ~569) streams library assets for `accessibleLibraries` with `asset.updateId` as the cursor, and the `libraryId`/ownership predicate keeps the space-link path. A bumped `asset.updateId` therefore re-delivers each transferred asset with the new `ownerId`. Fork clients apply it through `updateAssetsV1`, which writes `ownerId` (`mobile/lib/infrastructure/repositories/sync_stream.repository.dart`, ~255/297). Convergence for fork clients depends on that bump.
   - Stock clients have no library stream. They keep the row as an owned asset with a stale `ownerId` until a full resync: no delete and no re-send. This is a gap to decide on, not a bug in the code path.
-  - Do not fix the stock gap by writing `asset_audit` rows for the former owner. Fork clients would delete the row, `deleteAssetsV1` (`sync_stream.repository.dart`, ~227) would cascade face rows locally, and the library upsert would re-add the asset without them. Faces and album links would then need their own `updateId` bumps. Decision: accepted. Stock clients keep transferred assets as owned until a resync or reinstall. Transfers are rare, so no fix is planned.
+  - Do not fix the stock gap by writing `asset_audit` rows for the former owner. Fork clients would delete the row, `deleteAssetsV1` (`sync_stream.repository.dart`, ~227) would cascade face rows locally, and the library upsert would re-add the asset without them. Faces and album links would then need their own `updateId` bumps. Decision: accepted. Stock clients keep transferred assets as owned until a resync or reinstall. Transfers are rare, so no fix is planned. An optional tombstone that would close this gap is described in [Option C](#option-c-stock-client-tombstone-deferred); it is deferred.
   - Still to test: a fork client whose checkpoint predates the transfer, and whether the former owner's face stream drops transferred faces.
+
+## Implementation spec
+
+Status: proposed 2026-11-08 for review. No code exists. Code references were read on 2026-11-08 and must be re-checked when implementation starts. The items under [Decisions needed](#decisions-needed-before-coding) change Decisions 5 and 6 and need the owner's answer before coding.
+
+### Scope
+
+An admin-only transfer of one external library's owner, per Decisions 1 to 7. The change covers the server, one fork migration, and the web admin UI. Mobile is unchanged, because libraries are managed only in the web admin. The stock-client tombstone (Option C) is out of scope.
+
+### Code facts this builds on
+
+- `LibraryController` (`server/src/controllers/library.controller.ts`) serves `/libraries` behind `@Authenticated({ admin: true })`. `UpdateLibraryDto` has no owner field, so `PUT /libraries/:id` cannot change the owner.
+- `LibraryService.delete` soft-deletes the library, then runs `JobName.LibraryDelete`, which pages library assets with `JOBS_LIBRARY_PAGINATION_SIZE`. This is the batching pattern to reuse for planning.
+- `library.updateId` (`server/src/schema/tables/library.table.ts`) is an `UpdateIdColumn`, so bumping it re-delivers the library to clients.
+- `library_user` is keyed `(userId, libraryId)` with a `createId`. Inserts use `ON CONFLICT DO NOTHING`.
+- Shared-space entry points are `SharedSpaceService.create` (`server/src/services/shared-space.service.ts`, ~254), `addMember` (~579), and `linkLibrary` (~1027).
+- Fork controllers, services, and repositories register in `galleryControllers`, `galleryServices`, and `galleryRepositories` in `server/src/gallery/index.ts`.
+
+### Data model
+
+All new objects are fork tables keyed to Immich ids (AGENTS rule 1). The `library` table is not changed beyond the `updateId` bump it already supports.
+
+`library_owner_transfer` holds one row per transfer:
+- `id` uuid primary key; `libraryId`, `fromOwnerId`, and `toOwnerId`, which are fork foreign keys onto `library.id` and `user.id`.
+- `state` text: `queued`, `running`, `finalizing`, `done`, `failed`, or `cancelled`, enforced by a check constraint.
+- `spaceId` uuid (null until cutover), `error` text, `report` jsonb (null until `done`), `createdAt`, and `updatedAt`.
+- A partial unique index on `libraryId` where `state` is `queued`, `running`, or `finalizing`. One active transfer per library.
+
+`library_owner_transfer_person` holds the planned person mapping, with primary key `(transferId, sourcePersonId)`:
+- `action` (`copy` or `merge`) and `targetPersonId`. Copies are created during planning. A merge targets an existing new-owner person.
+- The primary key lets a retried planning step find its rows instead of creating duplicates.
+
+`library_owner_transfer_tag` holds the planned tag mapping, with primary key `(transferId, sourceTagId)` and `targetTagId`. A target tag is the new owner's tag with the same name, or a new one.
+
+The fork foreign keys (`libraryId`, `fromOwnerId`, `toOwnerId`, `sourcePersonId`, `targetPersonId`, `sourceTagId`, `targetTagId`) are listed in `server/src/schema/gallery-upstream-fks.json`.
+
+### Preview and planning
+
+These steps make no visible change.
+
+`GET /libraries/:id/owner-transfer/preview?toOwnerId=` is read-only and returns:
+- Counts of assets, faces, and tag links on library assets.
+- One people entry per source person with faces in the library: `sourcePersonId`, name, birthday, pet type and species for pets, face count, and merge candidates.
+- Merge candidates (Decision 5): a new-owner person with the same name, or a person shown in a shared space that links the library and has both users as members.
+- Mixed albums and stacks that will be split, listed by name.
+- The tag mapping by name.
+
+`POST /libraries/:id/owner-transfer` takes `{ toOwnerId, merges: [{ sourcePersonId, targetPersonId }] }`. It creates the row in `queued` and returns `202` with the transfer. The server recomputes the plan on start. It rejects a merge whose target is not a person of `toOwnerId` or is hidden. A second active transfer for the library returns `409`.
+
+The planning step creates the copied persons and the target tags, writes the mapping tables, and sets the state to `running`. A crash during planning leaves mapping rows and unused copies. A retry reuses them through the primary keys. On `failed`, the job deletes the copies the plan created.
+
+`GET /libraries/:id/owner-transfer` returns the latest transfer: `state`, `error`, `report`, and `spaceId` once set. `DELETE /libraries/:id/owner-transfer` cancels a transfer in `queued`. It returns `409` for `running` and `finalizing`.
+
+### Cutover
+
+Cutover is one transaction. It does these steps in order:
+1. Sets `library.ownerId = toOwnerId` and bumps `library.updateId`.
+2. Sets `asset.ownerId` on library assets and bumps their `asset.updateId`.
+3. Re-points each face on a library asset whose person is a mapped source to the target person, using the person column on `asset_face`. Bumps `asset_face.updateId` for every face on a library asset. The `ownerId` trigger copies the owner onto faces, and the face stream has no backfill, so the bump is required.
+4. Replaces tag links on library assets: inserts the target tag link and deletes the source tag link. Bumps `asset.updateId`.
+5. Recomputes `asset.isFavorite` on library assets from the new owner's `asset_favorite` overlay rows.
+6. Splits mixed albums and stacks by removing the transferred members. Albums and stacks made only of library assets move to `toOwnerId`.
+7. Inserts the new owner's `library_user` row with the default `createId`. The former owner's `library_user` row stays, because the space in step 8 grants them access through it. No `library_audit` row is written at cutover.
+8. Creates the shared space owned by `toOwnerId`, links the library, and adds the former owner as a viewer.
+9. Writes `report` and sets `state` to `done`.
+
+If any step fails, the transaction rolls back. The library stays with the former owner, and the state becomes `failed` with `error` set. Nothing is visible in between.
+
+After cutover, the former owner's own-assets stream stops returning transferred assets, because `AssetSync.getUpserts` filters on `ownerId`. The library stream delivers them through the space instead.
+
+### Write blocking
+
+While a transfer is `queued`, `running`, or `finalizing`, these requests return `409` for the library and its assets:
+- Scan (`POST /libraries/:id/scan`), library update, and library delete.
+- Asset update and delete for library assets, including the bulk endpoints.
+- Tag, album, and stack membership edits that include library assets.
+- Sidecar writes for library assets.
+
+Jobs queued before the transfer can still run during it. The scan and sidecar job handlers check the same state when they run. One helper, `assertLibraryNotTransferring(libraryId)`, in the gallery module serves both the routes and the jobs. The final route list comes from a grep of the write paths during implementation and is reviewed in the PR.
+
+### Authorization
+
+Every endpoint is admin-only. The matrix test follows AGENTS rule 7. Actors are admin, a non-admin owner of the library, a non-admin space member, and an unauthenticated caller. Operations are preview, start, status, and cancel. Library states are none, queued, running, done, and failed. Expected outcomes come from a truth table in this spec, not from the production helper. Each denied request checks that no row was written. The admin check is mutation-checked once by removing it.
+
+### Report
+
+Written at cutover:
+
+`{ fromOwnerId, toOwnerId, spaceId, assetsMoved, facesRepointed, personsCopied, personsMerged, tagLinksReplaced, favoritesRecomputed, albumsSplit: [{ name, removedCount }], stacksSplit: [{ name, removedCount }], completedAt }`
+
+### Sync
+
+No new sync stream. Expected results for fork clients follow the verify list above. The former owner's own-assets stream stops returning transferred assets. The library stream delivers them through the space with the new `ownerId`. The new owner receives the library and its assets through `library_user`. Stock clients see the accepted gap.
+
+### Migration and revert
+
+- One fork migration in `server/src/schema/migrations-gallery/`, with a round timestamp above the newest upstream and fork migrations. Check the current newest at implementation time; the newest fork file seen on 2026-11-08 is `1799700000000`. The proposed name is `1800000000000-AddLibraryOwnerTransfer`.
+- `down()` refuses while any transfer is active, then drops the tables. The ownership changes stay in upstream tables that an older Gallery already reads, so there is no data to move back. This departs from the AGENTS rule that `down()` moves data back, so it needs the owner's approval (see Decisions needed, item 4).
+- The new tables are added to `scripts/revert-to-immich.sql`. `server/src/schema/revert-to-immich.spec.ts` must pass.
+- Upstream files touched: `JobName` in `server/src/enum.ts` (one registration line), `scripts/revert-to-immich.sql`, and `server/src/schema/gallery-upstream-fks.json`. The preflight diff against the upstream tag reports each one.
+
+### Web
+
+- The entry point is one line in the upstream library admin page that renders a fork component from `web/src/lib/gallery/`.
+- The component follows the five steps in the mockup. Step 3's merge choices come from the preview response. Strings come from the nine-locale overlay, using the Decision 7 text.
+- Regenerate the SDK after the server build (`mise run open-api`).
+- Component tests cover step gating, merge toggles, disabled Merge rows with no candidate, and Cancel versus Back.
+
+### Tests
+
+Unit tests: the merge-candidate rule, state transitions, the guard helper, and mapping idempotence.
+
+Medium tests, against a real database:
+- Happy path: library and asset IDs are unchanged. EXIF, edits, trims, and asset-to-face links are intact. Faces point to copies with the source name and birthday. Pet type and species are copied. Hidden, favorite, and identity settings are not copied. A merged person keeps its own settings.
+- The former owner's faces on non-library assets and their persons are unchanged. Shares on the former owner's person groups are unchanged. Copies have no shares.
+- Tags are remapped by name. Tags on non-library assets are untouched.
+- `asset.isFavorite` is recomputed from the new owner's overlay. The former owner's `asset_favorite` rows are untouched.
+- Mixed albums and stacks are split. Albums and stacks made only of library assets move.
+- The shared space is created. The former owner reads through it. Removing their membership removes access.
+- A failure at each cutover step leaves no visible change, sets `failed`, and removes the copies.
+- A crash during planning, then a retry, creates no duplicate copies.
+- A reverse transfer restores ownership. A repeat transfer recomputes the favorite projection.
+- A scan or asset write during `running` is rejected. A queued scan job checks the guard when it runs.
+- Sync: pre-transfer checkpoints for both owners, from the open verification list. The new owner receives transferred faces through the face `updateId` bump.
+- The authorization matrix described above.
+
+Migration tests: up and down on a seeded database, and `down()` refuses during an active transfer.
+
+Scale check: measure cutover on a seeded 100,000-asset library before the design is final (Decisions needed, item 1).
+
+### Decisions needed before coding
+
+1. **Cutover in one transaction, not batches.** Batched visible writes break the Decision 6 rule that visibility changes only at finalization. The former owner's own-assets stream filters on `ownerId`, so each batch would remove assets from it mid-run. Recommendation: one transaction, after the scale check. This amends the batch wording in Decision 6.
+2. **Copied persons exist before cutover.** The new owner's people list can show copies with no visible faces during a run. Recommendation: accept this. The alternative is creating copies inside the cutover transaction, which moves planning into it.
+3. **Cancel only in `queued`.** Recommendation: yes. A running cutover cannot be cancelled, only completed or failed.
+4. **`down()` drops the tables instead of moving data back.** Recommendation: yes, with the refusal described above. This departs from the AGENTS rule.
+5. **Permission.** Either reuse `LibraryUpdate` with `admin: true`, or add `LibraryOwnerTransfer` to `Permission`. A new permission adds an entry to the access-oracle snapshot. Recommendation: reuse `LibraryUpdate`.
+
+### Verification before coding
+
+- The pre-transfer checkpoint sync test for both owners, from the verify list.
+- The reverse trigger's event clause, from the verify list.
+- Whether `SharedSpaceService.create`, `linkLibrary`, and `addMember` can run inside the cutover transaction, and which `AuthDto` the job builds for `toOwnerId`.
+- Whether the person create path creates a `person_group` row, which the copies need.
+
+### Phases
+
+1. Migration, tables, FK registry, revert script, and the state machine, each with tests.
+2. Preview and planning, with the copy and merge rules.
+3. Cutover and report, with sync and authorization tests.
+4. Write guard across routes and jobs.
+5. Web admin flow, component tests, SDK regeneration, and nine-locale strings.
+
+Cutover is atomic, so no phase leaves a half-visible state.
+
+## Option C: stock-client tombstone (deferred)
+
+This option would stop stock Immich clients from keeping transferred assets as owned. It is not part of the accepted decision above. Deferred on 2026-11-08: the transfer ships with the documented stock gap. Revisit only if stock users report stale owned photos.
+
+### Mechanism
+
+- A fork table, `asset_owner_transfer_tombstone`, holds one row per transferred asset and former owner: `assetId`, `formerOwnerId`, and an `id` that is a UUIDv7 in the same watermark domain as `asset_audit.id`.
+- Finalization writes the rows in the same transaction as the owner change. They are not `asset_audit` rows, so fork clients never read them.
+- `syncAssetsV2` (`server/src/services/sync.service.ts`, ~318) already sends `AssetDeleteV1` before upserts. For clients where `isForkAwareClient` is false, the tombstone rows for that user are merged into the delete stream. The stock client removes the rows before any upsert arrives.
+- A reverse transfer deletes the tombstones for the returning owner in the same finalization, so a stale delete cannot remove an asset that is owned again.
+- Cleanup is added to `cleanupAuditTables` (`server/src/gallery/utils/gallery-sync.streams.ts`, ~1211), with the same retention as `asset_audit`.
+- Schema: a fork migration with a `down()`. The `assetId` foreign key is a fork key onto an upstream key, so it is listed in `server/src/schema/gallery-upstream-fks.json`.
+
+### Tests required
+
+- A stock client whose checkpoint predates the transfer receives the delete and no longer holds the rows.
+- A fork client receives no tombstone for the same transfer.
+- A reverse transfer re-delivers the asset to the returning owner without a later delete.
+- A client past retention gets a full reset and holds only its current assets.
+
+### Unverified
+
+- Whether the stock app's backup re-checks device photos against the server and re-uploads them as new assets for the former owner. A tombstone would not prevent this.
+- Whether thumbnails cached on disk by the stock app are removed with the rows.
+- Whether the tombstone stream can share one checkpoint with `asset_audit` ids without a separate watermark.
+
+### Trade-off
+
+The option adds a table, a migration, a branch in the stock sync path, cleanup, and tests. It removes the stale-owned rows only for transfers made after it ships, and it does not cover backup or cached files. Sidecar work (Option B) does not depend on it. Decision (2026-11-08): finish the transfer with the documented stock gap and defer this option.
 
 ## Open items
 
+- Stock-client tombstone (Option C) is deferred (2026-11-08). Only a stock-user report would reopen the stock-client decision above.
 - Sidecar write-back and delete/re-add recovery are out of scope for this transfer (answered 2026-11-08). They remain separate work under Option B.
 - Pet type and species on a copied pet are copied (confirmed 2026-11-08).
-- The space-match rule for people-matching candidates is accepted as written (2026-11-08).
+- The space-suggestion rule for merge candidates is accepted as written (2026-11-08).

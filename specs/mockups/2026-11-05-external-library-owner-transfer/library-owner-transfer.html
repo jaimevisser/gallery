@@ -87,7 +87,9 @@ th{font-size:12px;color:var(--muted);font-weight:600}
 td.r,th.r{text-align:right}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden}
 .seg span{padding:4px 12px;font-size:12px;font-weight:500;color:#3a3f4c}
+.seg span{cursor:pointer}
 .seg span.on{background:var(--primary);color:#fff}
+.seg span.off{opacity:.4;cursor:default}
 .select{border:1px solid var(--line-2);border-radius:10px;padding:8px 12px;background:#fff;font-size:13px;min-width:220px;display:flex;justify-content:space-between;align-items:center}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .stat{padding:12px 14px;border-radius:12px;background:var(--subtle);border:1px solid var(--line)}
@@ -141,11 +143,12 @@ td.r,th.r{text-align:right}
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" aria-selected="true" data-t="s1">1 · Library page</button>
     <button class="tab" role="tab" aria-selected="false" data-t="s2">2 · Choose new owner</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s3">3 · Match people</button>
+    <button class="tab" role="tab" aria-selected="false" data-t="s3">3 · Merge people</button>
     <button class="tab" role="tab" aria-selected="false" data-t="s4">4 · Confirm</button>
     <button class="tab" role="tab" aria-selected="false" data-t="s5">5 · Running</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s6">6 · Interrupted or failed</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="s7">7 · Report</button>
+    <button class="tab" role="tab" aria-selected="false" data-t="s8">6 · Jobs page</button>
+    <button class="tab" role="tab" aria-selected="false" data-t="s6">7 · Interrupted or failed</button>
+    <button class="tab" role="tab" aria-selected="false" data-t="s7">8 · Report</button>
   </nav>
 </div>
 
@@ -156,6 +159,25 @@ td.r,th.r{text-align:right}
 .mi.danger{color:var(--danger)}
 .sep{height:1px;background:var(--line);margin:6px 4px}
 .inline{margin-top:14px}
+.qcard{display:flex;background:var(--subtle);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:14px}
+.qmain{flex:1;min-width:0;padding:20px 24px;display:flex;flex-direction:column;gap:8px}
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.qtitle{font-size:17px;font-weight:600;color:var(--primary)}
+.qtiles{display:flex;max-width:380px;margin-top:6px}
+.qtile{flex:1;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.qtile.a{background:var(--primary);color:#fff;border-radius:10px 0 0 10px}
+.qtile.w{background:var(--line-2);border-radius:0 10px 10px 0}
+.qtile b{font-size:22px}
+.qtable{background:#fff;border:1px solid var(--line);border-radius:10px;max-width:520px;font-size:13px;margin-top:6px}
+.qrow{display:grid;grid-template-columns:minmax(0,1fr) 7rem 5rem;gap:16px;padding:8px 14px;border-top:1px solid var(--line)}
+.qrow:first-child{border-top:0}
+.qrow.h{font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.qrow>span+span{justify-self:end;text-align:right}
+.qside{width:132px;display:flex;flex-direction:column;border-left:1px solid var(--line-2)}
+.qbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:600;background:#e9eaf0;border:0;border-top:1px solid var(--line-2);color:#3a3f4c;cursor:pointer}
+.qbtn:first-child{border-top:0}
+.qbtn.primary{background:var(--primary);color:#fff}
+.btn.text{background:transparent;border-color:transparent;color:var(--muted)}
 </style>
 
 <div class="doc" style="padding-top:0">
@@ -170,6 +192,7 @@ td.r,th.r{text-align:right}
         <div class="nav">Albums</div>
         <div class="nav">Spaces</div>
         <div class="nav-sec">Admin</div>
+        <div class="nav">Jobs</div>
         <div class="nav on">Libraries</div>
         <div class="nav">Users</div>
         <div class="nav">Settings</div>
@@ -214,6 +237,7 @@ td.r,th.r{text-align:right}
         <div class="nav">Albums</div>
         <div class="nav">Spaces</div>
         <div class="nav-sec">Admin</div>
+        <div class="nav">Jobs</div>
         <div class="nav on">Libraries</div>
         <div class="nav">Users</div>
         <div class="nav">Settings</div>
@@ -231,7 +255,7 @@ td.r,th.r{text-align:right}
           <div class="select" style="margin-top:6px"><span>Ana Lima · ana@home.example</span><span class="muted">▾</span></div>
           <div class="stats inline">
             <div class="stat"><b>4,812</b><span>photos and videos move</span></div>
-            <div class="stat"><b>23</b><span>people and pets copied or matched</span></div>
+            <div class="stat"><b>23</b><span>people and pets copied or merged</span></div>
             <div class="stat"><b>4</b><span>albums and stacks move with them</span></div>
             <div class="stat"><b>4</b><span>mixed albums and stacks are split</span></div>
           </div>
@@ -243,7 +267,7 @@ td.r,th.r{text-align:right}
   </div>
 </section>
 
-<!-- 3. Match people (optional) -->
+<!-- 3. Merge people (optional) -->
 <section class="screen" id="s3" hidden>
   <div class="frame">
     <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
@@ -253,6 +277,7 @@ td.r,th.r{text-align:right}
         <div class="nav">Albums</div>
         <div class="nav">Spaces</div>
         <div class="nav-sec">Admin</div>
+        <div class="nav">Jobs</div>
         <div class="nav on">Libraries</div>
         <div class="nav">Users</div>
         <div class="nav">Settings</div>
@@ -264,9 +289,9 @@ td.r,th.r{text-align:right}
     </div>
     <div class="scrim">
       <div class="modal wide">
-        <div class="modal-h"><h3>Match people to Ana's people</h3><div class="step">Step 2 of 3 · Optional</div></div>
+        <div class="modal-h"><h3>Merge people with Ana's people</h3><div class="step">Step 2 of 3 · Optional</div></div>
         <div class="modal-b">
-          <p class="muted">Match a person to someone Ana already has, or copy them. Matches are suggested when the names are identical, or when Jaime and Ana both see the same person in a shared space that links this library.</p>
+          <p class="muted">Merge a person into someone Ana already has, or copy them. Merges are suggested when the names are identical, or when Jaime and Ana both see the same person in a shared space that links this library.</p>
           <table class="inline">
             <thead><tr><th>Person in this library</th><th class="r">Photos</th><th>Ana's person</th><th>Action</th></tr></thead>
             <tbody>
@@ -274,31 +299,31 @@ td.r,th.r{text-align:right}
                 <td><div style="display:flex;gap:10px;align-items:center"><div class="thumb"></div><b>Sofia</b></div></td>
                 <td class="r mono">312</td>
                 <td>Sofia <span class="chip ok">Same name</span></td>
-                <td><div class="seg"><span class="on">Match</span><span>Copy</span></div></td>
+                <td><div class="seg" data-pick><span class="on">Merge</span><span>Copy</span></div></td>
               </tr>
               <tr>
                 <td><div style="display:flex;gap:10px;align-items:center"><div class="thumb b"></div><b>Lukas</b></div></td>
                 <td class="r mono">98</td>
-                <td class="muted">No match found</td>
-                <td><div class="seg"><span>Match</span><span class="on">Copy</span></div></td>
+                <td class="muted">No suggestion</td>
+                <td><div class="seg" data-pick><span class="off">Merge</span><span class="on">Copy</span></div></td>
               </tr>
               <tr>
                 <td><div style="display:flex;gap:10px;align-items:center"><div class="thumb c"></div><b>Max · dog</b></div></td>
                 <td class="r mono">41</td>
                 <td>Max · dog <span class="chip ok">Shared space: Family</span></td>
-                <td><div class="seg"><span class="on">Match</span><span>Copy</span></div></td>
+                <td><div class="seg" data-pick><span class="on">Merge</span><span>Copy</span></div></td>
               </tr>
               <tr>
                 <td><div style="display:flex;gap:10px;align-items:center"><div class="thumb d"></div><b>Unknown person 14</b></div></td>
                 <td class="r mono">17</td>
-                <td class="muted">No match found</td>
-                <td><div class="seg"><span>Match</span><span class="on">Copy</span></div></td>
+                <td class="muted">No suggestion</td>
+                <td><div class="seg" data-pick><span class="off">Merge</span><span class="on">Copy</span></div></td>
               </tr>
             </tbody>
           </table>
           <p class="muted" style="margin-top:10px;font-size:12px">Showing 4 of 23. Copies get the name and birthday; pets also get their type and species. Hidden and favorite settings are not copied.</p>
         </div>
-        <div class="modal-f"><span class="left">Matching is optional</span><button class="btn">Back</button><button class="btn primary">Next</button></div>
+        <div class="modal-f"><span class="left">Merging is optional</span><button class="btn">Back</button><button class="btn primary">Next</button></div>
       </div>
     </div>
   </div>
@@ -314,6 +339,7 @@ td.r,th.r{text-align:right}
         <div class="nav">Albums</div>
         <div class="nav">Spaces</div>
         <div class="nav-sec">Admin</div>
+        <div class="nav">Jobs</div>
         <div class="nav on">Libraries</div>
         <div class="nav">Users</div>
         <div class="nav">Settings</div>
@@ -329,15 +355,15 @@ td.r,th.r{text-align:right}
         <div class="modal-b">
           <ul class="bullets">
             <li>Ana Lima becomes the owner of every photo and video in this library, with their tags, and any albums or stacks that contain only these photos.</li>
-            <li>Ana Lima gets copies of the people and pets in these photos, with their names and birthdays. Hidden and favorite settings are not copied. Before you confirm, you can match each one to a person Ana Lima already has. Jaime keeps their own people and the photos of those people in their other libraries.</li>
+            <li>Ana Lima gets copies of the people and pets in these photos, with their names and birthdays. Hidden and favorite settings are not copied. Before you confirm, you can merge each one into a person Ana Lima already has. Jaime keeps their own people and the photos of those people in their other libraries.</li>
             <li>A shared space owned by Ana Lima is created so Jaime can keep viewing these photos, read-only. Jaime's favorites stay with Jaime. They lose access when they leave that space or the space is deleted.</li>
             <li>Jaime may keep seeing these photos as their own in the official Immich app until they reinstall it. Gallery apps update on their own.</li>
             <li>Albums and stacks that also contain photos outside this library stay with Jaime. The transferred photos are removed from them.</li>
             <li>The library cannot be scanned, and its photos cannot be edited, until the transfer finishes. If the transfer is interrupted, it resumes. If it fails, the library stays with Jaime.</li>
-            <li>When it finishes, you get a report of what moved, what was removed from mixed albums and stacks, and which people were matched or copied.</li>
+            <li>When it finishes, you get a report of what moved, what was removed from mixed albums and stacks, and which people were merged or copied.</li>
           </ul>
         </div>
-        <div class="modal-f"><span class="left">The transfer runs in the background</span><button class="btn">Cancel</button><button class="btn">Back</button><button class="btn primary">Transfer library</button></div>
+        <div class="modal-f"><span class="left">The transfer runs in the background</span><button class="btn text">Cancel</button><button class="btn">Back</button><button class="btn primary">Transfer library</button></div>
       </div>
     </div>
   </div>
@@ -353,6 +379,7 @@ td.r,th.r{text-align:right}
         <div class="nav">Albums</div>
         <div class="nav">Spaces</div>
         <div class="nav-sec">Admin</div>
+        <div class="nav">Jobs</div>
         <div class="nav on">Libraries</div>
         <div class="nav">Users</div>
         <div class="nav">Settings</div>
@@ -382,7 +409,7 @@ td.r,th.r{text-align:right}
   </div>
 </section>
 
-<!-- 6. Interrupted or failed -->
+<!-- 7. Interrupted or failed -->
 <section class="screen" id="s6" hidden>
   <div class="frame">
     <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
@@ -392,6 +419,7 @@ td.r,th.r{text-align:right}
         <div class="nav">Albums</div>
         <div class="nav">Spaces</div>
         <div class="nav-sec">Admin</div>
+        <div class="nav">Jobs</div>
         <div class="nav on">Libraries</div>
         <div class="nav">Users</div>
         <div class="nav">Settings</div>
@@ -419,7 +447,7 @@ td.r,th.r{text-align:right}
   </div>
 </section>
 
-<!-- 7. Report -->
+<!-- 8. Report -->
 <section class="screen" id="s7" hidden>
   <div class="frame">
     <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
@@ -429,6 +457,7 @@ td.r,th.r{text-align:right}
         <div class="nav">Albums</div>
         <div class="nav">Spaces</div>
         <div class="nav-sec">Admin</div>
+        <div class="nav">Jobs</div>
         <div class="nav on">Libraries</div>
         <div class="nav">Users</div>
         <div class="nav">Settings</div>
@@ -442,7 +471,7 @@ td.r,th.r{text-align:right}
         <div class="stats inline">
           <div class="stat"><b>4,812</b><span>assets moved</span></div>
           <div class="stat"><b>23</b><span>people and pets</span></div>
-          <div class="stat"><b>6</b><span>matched to Ana's people</span></div>
+          <div class="stat"><b>6</b><span>merged into Ana's people</span></div>
           <div class="stat"><b>17</b><span>copied</span></div>
         </div>
         <div class="cols2 inline">
@@ -460,13 +489,69 @@ td.r,th.r{text-align:right}
           <div class="card pad">
             <b>People and pets</b>
             <ul class="report-list" style="margin-top:8px">
-              <li><span>Sofia · matched to Sofia</span><span class="chip ok">Matched</span></li>
-              <li><span>Max · dog · matched to Max · dog</span><span class="chip ok">Matched</span></li>
+              <li><span>Sofia · merged into Sofia</span><span class="chip ok">Merged</span></li>
+              <li><span>Max · dog · merged into Max · dog</span><span class="chip ok">Merged</span></li>
               <li><span>Lukas · copied</span><span class="chip new">Copied</span></li>
               <li><span>Unknown person 14 · copied</span><span class="chip new">Copied</span></li>
               <li><span class="muted">+19 more in the full report</span><span></span></li>
             </ul>
           </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Jobs page -->
+<section class="screen" id="s8" hidden>
+  <div class="frame">
+    <header class="topbar"><div class="logo"><i></i>Gallery</div><div class="search">Search your library</div><div class="avatar">AD</div></header>
+    <div class="shell">
+      <aside class="side">
+        <div class="nav">Photos</div>
+        <div class="nav">Albums</div>
+        <div class="nav">Spaces</div>
+        <div class="nav-sec">Admin</div>
+        <div class="nav on">Jobs</div>
+        <div class="nav">Libraries</div>
+        <div class="nav">Users</div>
+        <div class="nav">Settings</div>
+      </aside>
+      <main class="main">
+        <div class="crumb"><a>Admin</a> / Jobs</div>
+        <div class="page-h"><h2>Jobs</h2></div>
+        <p class="muted" style="font-size:13px;margin-top:6px">A transfer appears as a card in the same layout as a queue. Its counts and actions differ, because it moves one library rather than a queue of jobs.</p>
+
+        <div class="qcard">
+          <div class="qmain">
+            <div class="qhead"><span class="qtitle">Thumbnail generation</span><span class="chip ok">Active</span></div>
+            <p class="muted" style="font-size:13px">Creates previews for new photos and videos.</p>
+            <div class="qtiles"><div class="qtile a"><span>Active</span><b>12</b></div><div class="qtile w"><span>Waiting</span><b>300</b></div></div>
+          </div>
+          <div class="qside"><button class="qbtn">Clear</button><button class="qbtn">Pause</button></div>
+        </div>
+
+        <div class="qcard">
+          <div class="qmain">
+            <div class="qhead"><span class="qtitle">Owner transfer: Family photos</span><span class="chip ok">Active</span></div>
+            <p class="muted" style="font-size:13px">Jaime to Ana Lima · started 10:42</p>
+            <div class="qtiles"><div class="qtile a"><span>Moved</span><b>2,000</b></div><div class="qtile w"><span>Remaining</span><b>2,812</b></div></div>
+            <div class="qtable">
+              <div class="qrow h"><span>Step</span><span>In progress</span><span>Queued</span></div>
+              <div class="qrow"><span>Move assets, batch 3 of 5</span><span>1</span><span>2</span></div>
+              <div class="qrow"><span>Finalize owner</span><span>0</span><span>1</span></div>
+            </div>
+          </div>
+          <div class="qside"><button class="qbtn">Details</button></div>
+        </div>
+
+        <div class="qcard">
+          <div class="qmain">
+            <div class="qhead"><span class="qtitle">Owner transfer: Harbor trips</span><span class="chip warn">Interrupted</span></div>
+            <p class="muted" style="font-size:13px">Jaime to Ana Lima · server restarted at batch 2 of 3 · resumes automatically</p>
+            <div class="qtiles"><div class="qtile a"><span>Moved</span><b>1,000</b></div><div class="qtile w"><span>Remaining</span><b>1,300</b></div></div>
+          </div>
+          <div class="qside"><button class="qbtn primary">Resume now</button><button class="qbtn">Details</button></div>
         </div>
       </main>
     </div>
@@ -481,6 +566,13 @@ tabs.forEach(t => t.addEventListener('click', () => {
   tabs.forEach(x => x.setAttribute('aria-selected', String(x === t)));
   document.querySelectorAll('.screen').forEach(s => { s.hidden = s.id !== t.dataset.t; });
 }));
+document.querySelectorAll('.seg[data-pick]').forEach(seg => {
+  const opts = [...seg.querySelectorAll('span')];
+  opts.forEach(opt => opt.addEventListener('click', () => {
+    if (opt.classList.contains('off')) return;
+    opts.forEach(x => x.classList.toggle('on', x === opt));
+  }));
+});
 </script>
 </body>
 </html>
